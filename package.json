@@ -22,6 +22,9 @@
     "url": "https://github.com/pipesjs/core/issues"
   },
   "homepage": "https://github.com/pipesjs/core#readme",
+  "peerDependencies": {
+    "web-streams-polyfill": "*"
+  },
   "devDependencies": {
     "babel-cli": "^6.6.4",
     "babel-polyfill": "^6.6.1",
