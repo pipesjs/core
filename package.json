@@ -1,0 +1,24 @@
+{
+  "name": "@pipes/core",
+  "version": "0.1.0",
+  "description": "Basic utilities for web streams",
+  "main": "es5/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pipesjs/core.git"
+  },
+  "keywords": [
+    "streams",
+    "pipesjs",
+    "utils"
+  ],
+  "author": "Diwank Singh <diwank.singh@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pipesjs/core/issues"
+  },
+  "homepage": "https://github.com/pipesjs/core#readme"
+}
