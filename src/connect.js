@@ -1,11 +1,12 @@
-// chain :: Streams... -> Stream
-// chain function takes one or more streams
-// and sequentially pipes them to each other.
+// connect :: Streams... -> Stream
+// connect function takes one or more streams
+// and sequentially pipes them to each other,
+// returning the result of the last pipe operation.
 //
-// `ReadableStream::pipeThrough` is the
-// convenient way to do this.
+// `ReadableStream::pipeThrough` is used to
+// connect the streams.
 
-export default function chain(origin, ...streams) {
+export default function connect(origin, ...streams) {
   // Check for transform streams
   let
     pipeThrough,

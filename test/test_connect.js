@@ -1,7 +1,7 @@
 import Events from "events";
 import assert from "assert";
 import { ReadableStream, TransformStream, WritableStream } from "../src/streams";
-import chain from "../src/chain";
+import connect from "../src/connect";
 
 // consts
 const
@@ -10,7 +10,7 @@ const
   gen = c => c.enqueue(token),
   noop = (k, e, d) => e(k) && d();
 
-suite("chain");
+suite("connect");
 
 test("check allowed orders", () => {
   let testChain,
@@ -34,14 +34,14 @@ test("check allowed orders", () => {
 
   // Check chaining
   assert.doesNotThrow( () => {
-    testChain = chain( source, w1 );
-    testChain = chain( source, through, w1 );
-    testChain = chain( through, source, w1 );
-    testChain = chain( r1, r2, through, source, w1 );
+    testChain = connect( source, w1 );
+    testChain = connect( source, through, w1 );
+    testChain = connect( through, source, w1 );
+    testChain = connect( r1, r2, through, source, w1 );
   });
 
   assert.throws( () => {
-    testChain = chain( w1, r1 );
+    testChain = connect( w1, r1 );
   });
 })
 
@@ -67,7 +67,7 @@ test("check flow order", done => {
   });
 
   // Chain
-  marilyn = chain( source, through );
+  marilyn = connect( source, through );
 
   // Set up listenener
   broker.on("chunk", chunk => {
