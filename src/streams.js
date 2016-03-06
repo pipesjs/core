@@ -28,4 +28,12 @@ if ( !!global.ReadableStream ) {
   }
 }
 
+export const
+  ReadableByteStream = interfaces.ReadableByteStream,
+  ReadableStream = interfaces.ReadableStream,
+  WritableStream = interfaces.WritableStream,
+  ByteLengthQueuingStrategy = interfaces.ByteLengthQueuingStrategy,
+  CountQueuingStrategy = interfaces.CountQueuingStrategy,
+  TransformStream = interfaces.TransformStream;
+
 export default interfaces;
