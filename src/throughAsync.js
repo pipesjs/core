@@ -24,7 +24,7 @@ export default function throughAsync ( fn, {
       // Run async fn
       let
         self = transformer,
-        future = fn( chunk );
+        future = fn( chunk ),
         findex = self._unfulfilledFutures.length;
 
       // Add to executing futures list
