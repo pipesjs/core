@@ -1,39 +1,49 @@
-// connect :: Streams... -> Stream
+// connect :: Streams... -> ReadableStream | Promise
 // connect function takes one or more streams
 // and sequentially pipes them to each other,
 // returning the result of the last pipe operation.
 //
-// `ReadableStream::pipeThrough` is used to
-// connect the streams.
+
+// Utils
+const
+  isTransform = s => s && s.writable && s.readable,
+  isWritable = s => s && s.write;
 
 export default function connect(origin, ...streams) {
-  // Check for transform streams
-  let
-    pipeThrough,
-    end = origin.readable || origin;
+  // Check origin
+  if ( !origin )
+    throw new Error("No streams passed");
 
+  let sink, end;
+
+  // Get the last stream
+  sink = streams.pop();
+
+  // if origin is a transform$, take it's readable part
+  end = origin.readable || origin;
+
+  // Connect the streams
   for ( let stream of streams ) {
 
-    // Null stream
-    if ( !end )
-      return end;
+    // Check for transform streams
+    if ( !isTransform( stream ))
+      throw new Error("Only transform streams allowed in the center");
 
-    // Extract piping function
-    if ( end.pipeThrough ) {
-      pipeThrough = end.pipeThrough.bind(end);
-
-    } else if ( end.readable ) {
-      pipeThrough = end.readable.pipeThrough.bind(end.readable);
-
-    } else {
-      throw new Error("Only readable and transform streams can be chained");
-
-    }
-
-    // Pipe streams into each other
-    // If transform stream then pipe readable
-    end = pipeThrough( stream );
+    // piping through a transform returns it's readable part
+    end = end.pipeThrough( stream );
   }
 
+  // Handle sink
+  if ( isWritable( sink ))
+    end = end.pipeTo( sink );
+
+  else if ( isTransform( sink ))
+    end = end.pipeThrough( sink );
+
+  else
+    throw new Error("Only writable and transform streams allowed at the end.");
+
+  // Return result
   return end;
 }
+
