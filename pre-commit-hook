@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# Redirect output to stderr.
+exec 1>&2
+
+# If you want to bypass the tests you may set the hooks.ignoretests flag
+ignoretests=$(git config --bool hooks.ignoretests)
+
+if [ "$ignoretests" = "true" ]
+then
+  exit 0
+fi
+
+# Command to execute
+runtest=$(npm run build && npm test)
+testresult=$?
+
+# Run tests and raise error on failure, else proceed to commit
+if [ $testresult -ne 0 ]
+then
+	cat <<\EOF
+Error: One or more tests are failing.
+
+Please fix the offending code before committing.
+
+If you know what you are doing you can disable this check using:
+
+  git config hooks.ignoretests true
+EOF
+	exit 1
+fi
