@@ -8,10 +8,9 @@
 //
 
 import connect from "./connect";
+import { isTransform, isReadable } from "./utils";
 
 const
-  isCompatible = s => s && s.readable && s.writable,
-  isReadable = s => s && s.pipeThrough,
   compatibilityError = `
     Only transform streams and readable-writable pairs can be chained
   `;
@@ -19,7 +18,7 @@ const
 export default function chain(origin, ...streams) {
 
   // Check that origin is a transform stream / { readable, writable }
-  if ( !isCompatible( origin ))
+  if ( !isTransform( origin ))
     throw new Error( compatibilityError );
 
   // connect the streams

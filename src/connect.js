@@ -4,10 +4,7 @@
 // returning the result of the last pipe operation.
 //
 
-// Utils
-const
-  isTransform = s => s && s.writable && s.readable,
-  isWritable = s => s && s.write;
+import { isTransform, isWritable } from "./utils";
 
 export default function connect(origin, ...streams) {
   // Check origin
