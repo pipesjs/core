@@ -2,7 +2,17 @@
 export const
   isTransform = s => s && s.writable && s.readable,
   isReadable = s => s && s.pipeThrough,
-  isWritable = s => s && s.write;
+  isWritable = s => s && s.write,
+
+  // Inspired by code from @tj/co library
+  isGenerator = o => o && typeof o.next === "function",
+  isGeneratorFn = ({ constructor }) => {
+    return constructor && (
+       constructor.name === "GeneratorFunction" ||
+       constructor.displayName === "GeneratorFunction"
+    );
+  };
+
 
 export function consumeGen( gen, enqueue, doneFn ) {
   // Get value and signal generator to wind up
