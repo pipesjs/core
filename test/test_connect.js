@@ -18,7 +18,7 @@ test("check flow", done => {
   writable = createTestWritable( assert );
 
   // End case
-  broker.on("writable:close", done);
+  broker.on(writable.signals.close, done);
 
   // Connect the streams
   assert.doesNotThrow( () => {
