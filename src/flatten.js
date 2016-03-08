@@ -50,7 +50,7 @@ export default function flatten(...streams) {
         );
 
       });
-    }
+    },
 
     pull (controller) {
       // The first promise to resolve
@@ -58,7 +58,7 @@ export default function flatten(...streams) {
       // and frees the stream to pull again.
       return Promise.race( chunkWaiters );
 
-    }
+    },
 
     cancel () {
       // If cancelled, cancel all streams
