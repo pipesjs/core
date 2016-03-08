@@ -1,5 +1,5 @@
-// throughAsync :: Async Function -> Opts {} -> TransformBlueprint
-// throughAsync takes an async function and wraps it into
+// pipeAsync :: Async Function -> Opts {} -> TransformBlueprint
+// pipeAsync takes an async function and wraps it into
 // a transform streams. Waits till completion, before enqueuing.
 //
 // Returns a blueprint class that can be used to
@@ -8,7 +8,7 @@
 
 import { TransformStream } from "./streams";
 
-export default function throughAsync ( fn, {
+export default function pipeAsync ( fn, {
   // opts
     init,
     readableStrategy,

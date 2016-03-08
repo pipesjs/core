@@ -1,5 +1,5 @@
-// throughGen :: Generator Function -> Opts {} -> TransformBlueprint
-// throughGen takes a generator function and wraps it into
+// pipeGen :: Generator Function -> Opts {} -> TransformBlueprint
+// pipeGen takes a generator function and wraps it into
 // a transform streams. Waits till completion, before enqueuing.
 // All yields are enqueued, back-pressure is respected and
 // the generator paused if queue getting back-pressured.
@@ -42,7 +42,7 @@ function consumeGenWithBP( controller, gen, doneFn ) {
 }
 
 
-export default function throughGen ( fn, {
+export default function pipeGen ( fn, {
   // opts
     init,
     readableStrategy,

@@ -1,5 +1,5 @@
-// throughFn :: Function -> Opts {} -> TransformBlueprint
-// throughFn takes a function and wraps it into
+// pipeFn :: Function -> Opts {} -> TransformBlueprint
+// pipeFn takes a function and wraps it into
 // a transform streams.
 // Returns a blueprint class that can be used to
 // instantiate above streams.
@@ -7,7 +7,7 @@
 
 import { TransformStream } from "./streams";
 
-export default function throughFn ( fn, {
+export default function pipeFn ( fn, {
   // opts
     init,
     readableStrategy,
