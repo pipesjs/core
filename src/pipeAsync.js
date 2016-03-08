@@ -32,7 +32,11 @@ export default function pipeAsync ( fn, {
 
       // Proceed to enqueue
       future
-        .then( enqueue, () => throw new Error )
+        .then( enqueue, () => {
+          // Signal error to stream
+          throw new Error
+        })
+
         // Remove itself from the _unfulfilledFutures list
         .then( () => self._unfulfilledFutures.splice( findex, 1 ) )
         .done( done );
