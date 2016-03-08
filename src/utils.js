@@ -5,7 +5,8 @@ export const
   isWritable = s => s && s.write,
 
   // Inspired by code from @tj/co library
-  isGenerator = o => o && typeof o.next === "function",
+  isFunction = f => f && typeof f === "function",
+  isGenerator = o => o && isFunction( o.next ),
   isGeneratorFn = ({ constructor }) => {
     return constructor && (
        constructor.name === "GeneratorFunction" ||
