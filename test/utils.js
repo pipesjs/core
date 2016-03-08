@@ -8,9 +8,14 @@ export function createTestReadable (data) {
   if ( !data )
     data = [1,2,3,4,5];
 
-  return new ReadableStream({
+  const signals = {
+    init: Symbol(),
+    cancel: Symbol()
+  };
+
+  let stream = new ReadableStream({
     start (c) {
-      broker.emit("readable:init");
+      broker.emit(signals.init);
       c.enqueue(data.pop());
     },
     pull (c) {
@@ -20,24 +25,37 @@ export function createTestReadable (data) {
       c.enqueue(data.pop());
     },
     cancel () {
-      broker.emit("readable:cancel");
+      broker.emit(signals.cancel);
     }
   });
+
+  stream.signals = signals;
+  return stream;
 }
 
 export function createTestWritable (fn) {
-  return new WritableStream({
+
+  const signals = {
+    init: Symbol(),
+    recv: Symbol(),
+    close: Symbol()
+  };
+
+  let stream = new WritableStream({
     start () {
-      broker.emit("writable:init");
+      broker.emit(signals.init);
     },
     write (chunk) {
       fn( chunk );
-      broker.emit("writable:recv", chunk);
+      broker.emit(signals.recv, chunk);
     },
     close () {
-      broker.emit("writable:close");
+      broker.emit(signals.close);
     }
   });
+
+  stream.signals = signals;
+  return stream;
 }
 
 export function createTestTransform () {
