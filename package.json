@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "babel src -d .",
+    "bundle": "browserify index.js > dist/pipes.core.js",
+    "minify": "uglifyjs index.js -o dist/pipes.core.min.js -c",
+    "dist": "npm run bundle && npm run minify",
     "test": "mocha --ui qunit --compilers js:babel-register"
   },
   "repository": {
@@ -33,6 +36,7 @@
     "babel-preset-stage-0": "^6.5.0",
     "babel-register": "^6.6.0",
     "babel-runtime": "^6.6.1",
+    "browserify": "^13.0.0",
     "mocha": "^2.4.5",
     "uglify-js": "^2.6.2"
   }
