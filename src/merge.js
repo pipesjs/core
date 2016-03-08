@@ -8,6 +8,23 @@
 
 import { ReadableStream } from "./streams";
 
+function parseResults (results) {
+  let
+    ended = false,
+    values = [];
+
+  // Accumulate values
+  for ( let { value, done } of results ) {
+    ended = ended || done;
+    values.push( value );
+  }
+
+  return {
+    value: values,
+    done: ended
+  };
+}
+
 export default function merge(...streams) {
   let readers, chunkWaiters, mergedStream, merger;
 
@@ -25,13 +42,19 @@ export default function merge(...streams) {
   merger = controller => {
     let
       promises = readers.map( r => r.read() ),
-      merged;
+      merged, push;
+
+    // Read values and push them onto the stream
+    push = ({ value, done }) => {
+      if ( done )
+        return controller.close();
+
+      controller.enqueue( value );
+    };
 
     // Combine values into an array
-    merged = Promise.all( promises ).then(
-      controller.enqueue.bind( controller ),
-      controller.error.bind( controller )
-    );
+    merged = Promise.all( promises ).then( parseResults )
+      .then( push, controller.error.bind( controller ));
 
     return merged;
   };
