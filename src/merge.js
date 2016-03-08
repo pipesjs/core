@@ -36,7 +36,7 @@ export default function merge(...streams) {
     return merged;
   };
 
-  return mergedStream = new ReadableStreams({
+  return mergedStream = new ReadableStream({
     start: merger,
     pull: merger,
 

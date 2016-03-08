@@ -19,7 +19,7 @@ export default function flatten(...streams) {
     throw new Error("Only ReadableStreams can be flattened")
   }
 
-  return mergedStream = new ReadableStreams({
+  return mergedStream = new ReadableStream({
     start (controller) {
       // await chunks
       chunkWaiters = readers.map( r => r.read() );

@@ -18,7 +18,9 @@ export default function pipeFn ( fn, {
   let transformer = {
     // Run function and enqueue result
     transform ( chunk, enqueue, done ) {
-      return enqueue( fn ( chunk )) && done();
+      enqueue( fn ( chunk ));
+
+      return done();
     },
 
     // if passed
