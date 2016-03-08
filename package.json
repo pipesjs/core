@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Basic utilities for web streams",
   "main": "index.js",
+  "browser": "dist/pipes.core.js",
   "scripts": {
     "build": "babel src -d .",
     "bundle": "browserify index.js > dist/pipes.core.js",
