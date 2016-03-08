@@ -2,12 +2,12 @@
   "name": "@pipes/core",
   "version": "0.1.0",
   "description": "Basic utilities for web streams",
-  "main": "index.js",
+  "main": "lib/index.js",
   "browser": "dist/pipes.core.js",
   "scripts": {
-    "build": "babel src -d .",
-    "bundle": "browserify index.js > dist/pipes.core.js",
-    "minify": "uglifyjs index.js -o dist/pipes.core.min.js -c",
+    "build": "babel src -d lib",
+    "bundle": "browserify lib/index.js > dist/pipes.core.js",
+    "minify": "uglifyjs lib/index.js -o dist/pipes.core.min.js -c",
     "dist": "npm run bundle && npm run minify",
     "test": "mocha --ui qunit --compilers js:babel-register"
   },
