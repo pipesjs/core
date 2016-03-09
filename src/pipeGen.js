@@ -24,7 +24,7 @@ class GenObjManager {
   }
 
   get then () { return this.promise.then.bind(this.promise); }
-  get ready () { return this.readable.controller.desiredSize >= 0 }
+  get ready () { return this.readable._controller.desiredSize >= 0 }
   start () {
     if ( this.running || !this.gen )
       return;
@@ -60,7 +60,7 @@ class GenObjManager {
       this.running = false;
       this.done()
 
-    } else if ( this.running ) { // && this.ready ) {
+    } else if ( this.running && this.ready ) {
       this.tick( msg );
 
     } else {
