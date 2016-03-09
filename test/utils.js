@@ -3,6 +3,10 @@ import { ReadableStream, TransformStream, WritableStream } from "../src/streams"
 
 export const broker = new Events;
 
+export function till ( time ) {
+  return new Promise( resolve => setTimeout( resolve, time ) );
+}
+
 export function createTestReadable (data) {
   // Ensure data
   if ( !data )
