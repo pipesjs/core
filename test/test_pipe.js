@@ -72,5 +72,30 @@ test("check gen function", done => {
   });
 });
 
+test("check infinite gen function", done => {
+  let writable, transform, counter = 0;
 
+  // Create test streams
+  writable = createTestWritable( n => {
+    if ( counter >= 6 )
+      return writable.close();
+
+    counter+=n;
+  });
+
+  transform = pipe( function* (k) {
+    while( !( yield k ));
+  }, { init: 1 });
+
+  // End case
+  broker.on(writable.signals.close, () => {
+    assert.equal( counter, 6 );
+    done();
+  });
+
+  // Connect the streams
+  assert.doesNotThrow( () => {
+    connect( (new transform), writable );
+  });
+});
 
