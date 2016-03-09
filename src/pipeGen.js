@@ -139,9 +139,10 @@ export default function pipeGen ( fn, {
       // Bind transform function to stream
       transformer.transform = transformer.transform.bind(stream);
 
+      // Super hacky because TransformStream doesn't allow an easy way to do this
       // Wrap pull so that it can signal generator to resume
-      let _pull = stream.readable.pull;
-      stream.readable.pull = c => {
+      let _pull = stream.readable._underlyingSource.pull;
+      stream.readable._underlyingSource.pull = c => {
 
         // Resume generator manager
         genManager && genManager.start();
