@@ -17,6 +17,7 @@ export default function pipeAsync ( fn, {
 
   // Prepare transformer
   let transformer = {
+    // Store awaiting functions
     _unfulfilledFutures: [],
 
     // Run function and enqueue result
@@ -25,6 +26,8 @@ export default function pipeAsync ( fn, {
       let
         self = transformer,
         future = fn( chunk ),
+
+        // Get index of current future
         findex = self._unfulfilledFutures.length;
 
       // Add to executing futures list

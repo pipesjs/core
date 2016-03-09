@@ -14,9 +14,11 @@ export const
     );
   };
 
+// Zips together two arrays using given fn
 export function zipWith( fn, arr1, arr2 ) {
   let res = [];
 
+  // Pop values, push zipped values
   while ( arr1.length && arr2.length )
     res.push( fn( arr1.pop(), arr2.pop() ));
 

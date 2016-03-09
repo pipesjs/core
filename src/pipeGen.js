@@ -10,6 +10,8 @@
 
 import { TransformStream } from "./streams";
 
+// Manages generator object and consumes it
+// while taking backpressure into account
 class GenObjManager {
   constructor ( gen, enqueue, readable ) {
     let
@@ -23,8 +25,13 @@ class GenObjManager {
     });
   }
 
+  // Make manager a thenable
   get then () { return this.promise.then.bind(this.promise); }
+
+  // Get backpressure signals
   get ready () { return this.readable._controller.desiredSize >= 0 }
+
+  // Kick start the read loop
   start () {
     if ( this.running || !this.gen )
       return;
@@ -38,33 +45,50 @@ class GenObjManager {
     this.running = false;
   }
 
+  close () {
+    this.pause();
+
+    // Close generator
+    this.gen.return();
+    this.gen = null;
+
+    // Call done
+    this.done();
+  }
+
+  // Flush the gen and close
   flush (n=1) {
     if ( !this.gen )
       return;
 
-    this.running = false;
+    // Pause
+    this.pause();
 
+    // Read gen n times
+    // passing it a true value to signal shutdown
     while (n--)
       this.tick( true );
 
-    this.gen.return();
-    this.done();
+    // Close the generator
+    this.close();
   }
 
   tick ( msg ) {
+    // Get next value
     let { value, done } = this.gen.next( msg );
+
+    // Enqueue value to stream
     this.enqueue( value );
 
+    // Process next tick
     if ( done ) {
-      this.gen = null;
-      this.running = false;
-      this.done()
+      this.close();
 
     } else if ( this.running && this.ready ) {
       this.tick( msg );
 
     } else {
-      this.running = false;
+      this.pause();
     }
   }
 }
@@ -88,6 +112,7 @@ export default function pipeGen ( fn, {
         this.readable
       );
 
+      // Set up closing
       genManager.then( () => done() );
 
       // Start consuming

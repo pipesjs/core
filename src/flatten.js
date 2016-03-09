@@ -14,9 +14,10 @@ export default function flatten(...streams) {
 
   return flattenedStream = new ReadableStream({
     start (controller) {
-      // Create writers
+      // Create writers for each stream
       while ( writers.length < streams.length )
         writers.push( new WritableStream({
+            // write incoming to flattenedStream
             write: controller.enqueue.bind( controller )
           })
         );
@@ -24,17 +25,17 @@ export default function flatten(...streams) {
       // Connect streams to writers
       let
         connect = (r, w) => r.pipeTo( w ),
-        done;
+        pipedAll;
 
       try {
-        done = zipWith( connect, streams, writers );
+        pipedAll = zipWith( connect, streams, writers );
 
       } catch (e) {
         throw new Error("Only readable streams can be flattened.");
       }
 
       // Set up closing
-      return Promise.all( done ).then(
+      return Promise.all( pipedAll ).then(
         controller.close.bind( controller ),
         controller.error.bind( controller )
       );

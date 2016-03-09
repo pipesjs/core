@@ -8,6 +8,7 @@
 
 import { ReadableStream } from "./streams";
 
+// Parses arrays of {value, done} pairs to final pair
 function parseResults (results) {
   let
     ended = false,
@@ -41,6 +42,7 @@ export default function merge(...streams) {
   // Merging function
   merger = controller => {
     let
+      // Get read promises
       promises = readers.map( r => r.read() ),
       merged, push;
 
@@ -53,7 +55,8 @@ export default function merge(...streams) {
     };
 
     // Combine values into an array
-    merged = Promise.all( promises ).then( parseResults )
+    merged = Promise.all( promises )
+      .then( parseResults )
       .then( push, controller.error.bind( controller ));
 
     return merged;
