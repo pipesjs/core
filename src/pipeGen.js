@@ -9,7 +9,65 @@
 //
 
 import { TransformStream } from "./streams";
-import { consumeGen, consumeGenWithBP } from "./utils";
+
+class GenObjManager {
+  constructor ( gen, enqueue, readable ) {
+    let
+      done,
+      promise = new Promise( resolve => { done = resolve });
+
+    // Add props
+    Object.assign( this, {
+      done, gen, enqueue, readable, promise,
+      running: false
+    });
+  }
+
+  get then () { return this.promise.then.bind(this.promise); }
+  get ready () { return this.readable.controller.desiredSize >= 0 }
+  start () {
+    if ( this.running || !this.gen )
+      return;
+
+    // Start the loop
+    this.running = true;
+    this.tick();
+  }
+
+  pause () {
+    this.running = false;
+  }
+
+  flush (n=1) {
+    if ( !this.gen )
+      return;
+
+    this.running = false;
+
+    while (n--)
+      this.tick( true );
+
+    this.gen.return();
+    this.done();
+  }
+
+  tick ( msg ) {
+    let { value, done } = this.gen.next( msg );
+    this.enqueue( value );
+
+    if ( done ) {
+      this.gen = null;
+      this.running = false;
+      this.done()
+
+    } else if ( this.running ) { // && this.ready ) {
+      this.tick( msg );
+
+    } else {
+      this.running = false;
+    }
+  }
+}
 
 export default function pipeGen ( fn, {
   // opts
@@ -19,39 +77,27 @@ export default function pipeGen ( fn, {
   }={} ) {
 
   // Prepare transformer
-  let transformer = {
-    resume: null,
-    liveGenerator: null,
-
-    // Run function and enqueue result
+  let
+    genManager,
+    transformer = {
     transform ( chunk, enqueue, done ) {
-      // Create generator
-      let
-        self = transformer,
-        stream = this,
-        gen = fn( chunk );
-
-      // Add to current gen
-      self.liveGenerator = gen;
-
-      // Create resume function
-      self.resume = consumeGenWithBP.bind( null,
-        stream.readable.controller,
-        self.liveGenerator,
-        done
+      // Create generator manager
+      genManager = new GenObjManager(
+        fn( chunk ),
+        enqueue,
+        this.readable
       );
 
-      return self.resume();
+      genManager.then( () => done() );
+
+      // Start consuming
+      genManager.start();
     },
 
     flush ( enqueue, close ) {
-      let self = transformer;
-
-      if ( self.liveGenerator )
-        consumeGen( self.liveGenerator, enqueue, close );
-
-      else
-        close();
+      // Flush generator
+      genManager && genManager.flush();
+      close();
     },
 
     // if passed
@@ -72,8 +118,8 @@ export default function pipeGen ( fn, {
       let _pull = stream.readable.pull;
       stream.readable.pull = c => {
 
-        let { resume } = transformer;
-        resume && resume();
+        // Resume generator manager
+        genManager && genManager.start();
 
         return _pull(c);
       }

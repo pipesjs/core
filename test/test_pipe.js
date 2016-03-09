@@ -49,7 +49,7 @@ test("check async function", done => {
   });
 });
 
-test.skip("check gen function", done => {
+test("check gen function", done => {
   let readable, writable, transform, counter = 0;
 
   // Create test streams

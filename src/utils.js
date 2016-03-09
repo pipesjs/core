@@ -22,36 +22,3 @@ export function zipWith( fn, arr1, arr2 ) {
 
   return res;
 }
-
-export function consumeGen( gen, enqueue, doneFn ) {
-  // Get value and signal generator to wind up
-  let { value, done } = gen.next( true );
-  controller.enqueue( value );
-
-  if ( done )
-    return doneFn();
-
-  // Keep consuming
-  else
-    return consumeGen( gen, enqueue, doneFn );
-}
-
-export function consumeGenWithBP( controller, gen, doneFn ) {
-  // Check for back pressure
-  // if desiredSize negative stop consuming
-  if ( controller.desiredSize <= 0 )
-    return;
-
-  // Get value
-  let { value, done } = gen.next();
-  controller.enqueue( value );
-
-  if ( done )
-    return doneFn();
-
-  // Keep consuming
-  else
-    return consumeGenWithBP( controller, gen, doneFn );
-}
-
-
