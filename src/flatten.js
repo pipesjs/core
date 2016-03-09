@@ -4,60 +4,40 @@
 // returning chunks as they arrive in combined streams.
 //
 
-import { ReadableStream } from "./streams";
+import { ReadableStream, WritableStream } from "./streams";
+import { zipWith } from "./utils";
 
 export default function flatten(...streams) {
-  let readers, chunkWaiters, mergedStream;
+  let
+    flattenedStream,
+    writers = [];
 
-  // Get readers
-  try {
-    readers = streams.map( stream => stream.getReader());
-
-  // Check for transform streams
-  } catch (e) {
-
-    throw new Error("Only ReadableStreams can be flattened")
-  }
-
-  return mergedStream = new ReadableStream({
+  return flattenedStream = new ReadableStream({
     start (controller) {
-      // await chunks
-      chunkWaiters = readers.map( r => r.read() );
-
-      // Function for enqueuing chunks
-      let enqueueAndReplace = i => chunk => {
-        // Push chunk to stream
-        controller.enqueue( chunk );
-
-        // Replace itself in the waiters
-        let newPromise = readers[i].read();
-        chunkWaiters[i] = newPromise.then(
-          enqueueAndReplace(i),
-
-          // error handling
-          controller.error.bind(controller)
+      // Create writers
+      while ( writers.length < streams.length )
+        writers.push( new WritableStream({
+            write: controller.enqueue.bind( controller )
+          })
         );
 
-        return chunk;
-      };
+      // Connect streams to writers
+      let
+        connect = (r, w) => r.pipeTo( w ),
+        done;
 
-      // Add replacement hooks
-      chunkWaiters.map( (promise, i) => {
+      try {
+        done = zipWith( connect, streams, writers );
 
-        return promise.then(
-          enqueueAndReplace(i),
-          controller.error.bind(controller)
-        );
+      } catch (e) {
+        throw new Error("Only readable streams can be flattened.");
+      }
 
-      });
-    },
-
-    pull (controller) {
-      // The first promise to resolve
-      // pushes chunk on to the queue
-      // and frees the stream to pull again.
-      return Promise.race( chunkWaiters );
-
+      // Set up closing
+      return Promise.all( done ).then(
+        controller.close.bind( controller ),
+        controller.error.bind( controller )
+      );
     },
 
     cancel () {

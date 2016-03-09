@@ -14,6 +14,14 @@ export const
     );
   };
 
+export function zipWith( fn, arr1, arr2 ) {
+  let res = [];
+
+  while ( arr1.length && arr2.length )
+    res.push( fn( arr1.pop(), arr2.pop() ));
+
+  return res;
+}
 
 export function consumeGen( gen, enqueue, doneFn ) {
   // Get value and signal generator to wind up
