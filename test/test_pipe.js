@@ -49,4 +49,28 @@ test("check async function", done => {
   });
 });
 
+test.skip("check gen function", done => {
+  let readable, writable, transform, counter = 0;
+
+  // Create test streams
+  readable = createTestReadable( [1,2,3] );
+  writable = createTestWritable( () => counter+=1 );
+  transform = pipe( function* (k) {
+    yield k;
+    return k;
+  });
+
+  // End case
+  broker.on(writable.signals.close, () => {
+    assert.equal( counter, 6 );
+    done();
+  });
+
+  // Connect the streams
+  assert.doesNotThrow( () => {
+    connect( readable, (new transform), writable );
+  });
+});
+
+
 
