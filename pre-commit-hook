@@ -12,7 +12,7 @@ then
 fi
 
 # Command to execute
-runtest=$(npm run build && npm test)
+runtest=$(npm run build-all && npm test)
 testresult=$?
 
 # Run tests and raise error on failure, else proceed to commit
