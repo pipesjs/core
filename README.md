@@ -304,3 +304,27 @@ let add = (a, b) => a + b,
 
 zipped.pipeTo( writable );   // 5, 7, 9
 ```
+
+### split
+
+```javascript
+split (
+  ReadableStream(),
+  Int (default=2)
+) -> [...ReadableStream()]
+```
+
+`split` takes a `readable` and a number of branches, returns an array of `readable`s that are copies of the original. `ReadableStream().tee` is called repeatedly to produce the branches.
+
+To cancel the original stream, all the branches must be canceled first. Hence the resulting branches have an added `cancelAll()` method that cancels all the branches and the original stream.
+
+```javascript
+
+let readable = createReadable([1,2,3]),
+  [r1, r2] = split( readable ),
+  w1 = createWritable(),
+  w2 = createWritable();
+
+r1.pipeTo( w1 );   // 1, 2, 3
+r2.pipeTo( w2 );   // 1, 2, 3
+```
