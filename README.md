@@ -281,3 +281,26 @@ let r1 = createReadable([1,2,3]),
 
 merged.pipeTo( writable );   // [1,4], [2,5], [3,6]
 ```
+
+### zip
+
+```javascript
+zip (
+  ReadableStream()<Function>,
+  ...ReadableStream()
+) -> ReadableStream()
+```
+
+`zip` takes a `readable` producing functions and any number of `readable streams` and returns a new `readable stream` with the results of functions applied to corresponding chunks produced by the rest input streams enqueued. It waits for all the streams to produce a value before zipping them together. Resulting stream closes when any of the input streams does.
+
+```javascript
+
+let add = (a, b) => a + b,
+  rFn = createReadable([add,add,add]),
+  r1 = createReadable([1,2,3]),
+  r2 = createReadable([4,5,6]),
+  writable = createWritable(),
+  zipped = zip(rFn,r1,r2);
+
+zipped.pipeTo( writable );   // 5, 7, 9
+```
