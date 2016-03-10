@@ -6,7 +6,7 @@
 
 # pipes/ core
 
-## TOC
+## Contents
 
  - [About](#about)
  - [Installing](#installing)
@@ -82,4 +82,70 @@ If you want, you can directly import the es6 modules like so:
     import flatten from "@pipes/core/src/flatten";
 ```
 
+## API Reference
 
+### pipe
+
+```javascript
+pipe (
+  Function | Generator Function,
+  Object {
+    init,   // value to initiate transform stream
+    writableStrategy,
+    readableStrategy    // instances of queuing strategies
+  }
+) -> TransformBlueprint // Constructor that returns transform stream
+```
+
+`pipe` function takes a transform function or generator and an opts object; returns a TransforBlueprint that can be used to create `transform streams`.
+
+If a `Generator Function` is passed, it is consumed entirely on each transform call and results enqueud. Backpressure is handled automatically and if `stream` is cancelled, any live `generator` is gracefully shutdown. On shutdown, `generator` is sent `true` as a signal to prepare shutdown.
+
+```javascript
+
+// Setup
+let createReadable = () => new ReadableStream({
+  start (controller) {
+    this.data = [1,2,3];
+
+    // Kickstart stream
+    controller.enqueue( this.data.pop() );
+  },
+  pull (controller) {
+    if ( !this.data.length )
+      return controller.close()
+
+    controller.enqueue( this.data.pop() );
+  }
+});
+
+// Pure funtion example
+let negator = pipe( n => -n ),
+  rIn = createReadable(),
+  rOut;
+
+rOut = rIn.pipeThrough( new negator );  // -1, -2, -3
+
+
+// Basic generator example
+let doubler = pipe( function* (v) {
+    yield v;
+    yield v;
+  }),
+  rIn = createReadable(),
+  rOut;
+
+rOut = rIn.pipeThrough( new doubler );  // 1, 1, 2, 2, 3, 3
+
+
+// Infinite generator example
+
+let inf = pipe( function* (v) {
+    // Close on shutdown signal
+    while( !( yield v ));
+  }, {
+    init: 1
+  });
+
+new inf;    // 1, 1, 1, 1...
+```
