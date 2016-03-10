@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>PipesJs/Core by pipesjs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">PipesJs/Core</h1>
+      <h2 class="project-tagline">Basic utilities for web streams</h2>
+      <a href="https://github.com/pipesjs/core" class="btn">View on GitHub</a>
+      <a href="https://github.com/pipesjs/core/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/pipesjs/core/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="pipesjs" class="anchor" href="#pipesjs" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>pipesjs</h1>
+
+<p><code>pipesjs</code> includes an evolving bunch of modules of utilities and helpers for <a href="https://streams.spec.whatwg.org"><code>web streams</code></a>.</p>
+
+<hr>
+
+<h1>
+<a id="pipes-core" class="anchor" href="#pipes-core" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>pipes/ core</h1>
+
+<h2>
+<a id="about" class="anchor" href="#about" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>About</h2>
+
+<p>The <code>core</code> module contains some basic utility functions to make working with <code>web streams</code> a lot easier. Here's more about <code>Web Streams</code> from the <a href="https://streams.spec.whatwg.org">spec</a> itself:</p>
+
+<blockquote>
+<p>Large swathes of the web platform are built on streaming data: that is, data that is created, processed, and consumed in an incremental fashion, without ever reading all of it into memory. The Streams Standard provides a common set of APIs for creating and interfacing with such streaming data, embodied in readable streams, writable streams, and transform streams.</p>
+</blockquote>
+
+<p>The spec is still evolving but have reasched a fairly stable stage with a <a href="https://github.com/whatwg/streams/tree/master/reference-implementation">reference implementation</a> as well. The API has almost been finalized and <code>Stream</code>s are coming to the web very soon!</p>
+
+<p>At it's core, the API exposes these three major components:</p>
+
+<ul>
+<li>
+<code>ReadableStream</code> encapsulates a source producing values and emits them.</li>
+<li>
+<code>TransformStream</code> are essentially <code>{ readable, writable}</code> pairs that take a function which can be used to transform the values flowing through it.</li>
+<li>
+<p><code>WritableStream</code> encapsulates a sink that receives values and writes to it.</p>
+
+<p><code>Stream</code>s are essentially data structures that handle sequential flow of values. You can split streams, merge them and connect them together in various ways. What's amazing is that, in most cases, they can handle <a href="https://streams.spec.whatwg.org/#pipe-chains">backpressure</a> automatically, so you don't have to mess with the underlying details.</p>
+</li>
+</ul>
+
+<p>For further information, the spec is quite informative and easy to read.</p>
+
+<p><strong>Heads up:</strong> If you're coming from <code>node</code> land, web <code>stream</code>s are quite a lot different from node <code>stream</code>s and incompatible with each other.</p>
+
+<h2>
+<a id="installing" class="anchor" href="#installing" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installing</h2>
+
+<h3>
+<a id="for-browsers" class="anchor" href="#for-browsers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>For browsers</h3>
+
+<p>The library depends on a <a href="https://github.com/creatorrr/web-stream-polyfill">polyfill</a> for browsers that don't support <code>Stream</code> APIs yet (which as of now, is all of them), so make sure you include it in before including the library.</p>
+
+<p>You can use either of the builds from the <code>dist</code> folder:</p>
+
+<div class="highlight highlight-text-html-basic"><pre><span class="pl-s1">    &lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>path/to/web-streams-polyfill.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;</span>
+<span class="pl-s1">    &lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>path/to/pipes.core.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;</span></pre></div>
+
+<p>And in your code, all the functions will be available on the <code>window.Pipes</code> variable.</p>
+
+<div class="highlight highlight-source-js"><pre>
+    <span class="pl-k">let</span> { pipe, flatten } <span class="pl-k">=</span> <span class="pl-c1">window</span>.<span class="pl-smi">Pipes</span>;
+
+    <span class="pl-en">flatten</span>(<span class="pl-c">/* some streams here */</span>);</pre></div>
+
+<h3>
+<a id="for-browserify-users" class="anchor" href="#for-browserify-users" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>For browserify users</h3>
+
+<p>The library has a <a href="https://nodejs.org/en/blog/npm/peer-dependencies/">peer-dependency</a> on <a href="https://github.com/creatorrr/web-stream-polyfill">web-streams-polyfill</a>, so to install it:</p>
+
+<div class="highlight highlight-source-shell"><pre>
+    npm install web-streams-polyfill @pipes/core
+</pre></div>
+
+<p>The library is split up into modules, so you can both require the whole library or only parts of it:</p>
+
+<div class="highlight highlight-source-js"><pre>
+    <span class="pl-k">let</span> { flatten } <span class="pl-k">=</span> <span class="pl-c1">require</span>(<span class="pl-s"><span class="pl-pds">"</span>@pipes/core<span class="pl-pds">"</span></span>);
+    <span class="pl-k">let</span> merge <span class="pl-k">=</span> <span class="pl-c1">require</span>(<span class="pl-s"><span class="pl-pds">"</span>@pipes/core/merge<span class="pl-pds">"</span></span>);</pre></div>
+
+<h3>
+<a id="for-es6-and-rollup-users" class="anchor" href="#for-es6-and-rollup-users" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>For ES6 and Rollup users</h3>
+
+<p>If you want, you can directly import the es6 modules like so:</p>
+
+<div class="highlight highlight-source-js"><pre>
+    <span class="pl-k">import</span> <span class="pl-smi">pipes</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">"</span>@pipes/core/src<span class="pl-pds">"</span></span>;
+    <span class="pl-k">import</span> { <span class="pl-smi">flatten</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">"</span>@pipes/core/src<span class="pl-pds">"</span></span>;
+    <span class="pl-k">import</span> <span class="pl-smi">flatten</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">"</span>@pipes/core/src/flatten<span class="pl-pds">"</span></span>;</pre></div>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/pipesjs/core">PipesJs/Core</a> is maintained by <a href="https://github.com/pipesjs">pipesjs</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
