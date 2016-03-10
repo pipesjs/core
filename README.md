@@ -87,13 +87,14 @@ If you want, you can directly import the es6 modules like so:
 
 The library only consists of the following functions:
 
- -  chain
- -  connect
- -  flatten
- -  split
- -  pipe
- -  merge
- -  zip
+ -  [pipe](#pipe)
+ -  [pipe.async](#pipeasync)
+ -  [chain](#chain)
+ -  [connect](#connect)
+ -  [flatten](#flatten)
+ -  [merge](#merge)
+ -  [zip](#zip)
+ -  [split](#split)
 
 ### pipe
 
