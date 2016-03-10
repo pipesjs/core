@@ -6,7 +6,7 @@
   "scripts": {
     "build": "babel src -d .",
     "bundle": "browserify index.js > dist/pipes.core.js",
-    "minify": "uglifyjs index.js -o dist/pipes.core.min.js -c",
+    "minify": "uglifyjs dist/pipes.core.js -o dist/pipes.core.min.js -c",
     "dist": "npm run bundle && npm run minify",
     "build-all": "npm run build && npm run dist",
     "prepublish": "npm run build-all",
