@@ -261,3 +261,23 @@ let r1 = createReadable([1,2,3]),
 
 flattened.pipeTo( writable );   // 1,4,2,5,3,6   (order depends on order received so may vary)
 ```
+
+### merge
+
+```javascript
+merge (
+  ...ReadableStream()
+) -> ReadableStream()
+```
+
+`merge` takes any number of `readable streams` and returns a new `readable stream` with arrays of chunks produced by all the input streams enqueued. It waits for all the streams to produce a value before grouping them together. Resulting stream closes when any of the input streams does.
+
+```javascript
+
+let r1 = createReadable([1,2,3]),
+  r2 = createReadable([4,5,6,7]),
+  writable = createWritable(),
+  merged = merge(r1,r2);
+
+merged.pipeTo( writable );   // [1,4], [2,5], [3,6]
+```
