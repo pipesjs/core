@@ -10,6 +10,7 @@
 
  - [About](#about)
  - [Installing](#installing)
+ - [API Reference](#api-reference)
 
 ## About
 
@@ -148,4 +149,58 @@ let inf = pipe( function* (v) {
   });
 
 new inf;    // 1, 1, 1, 1...
+```
+
+### pipe.async
+
+```javascript
+pipe.async (
+  Async Function,
+  Object {
+    init,   // value to initiate transform stream
+    writableStrategy,
+    readableStrategy    // instances of queuing strategies
+  }
+) -> TransformBlueprint // Constructor that returns transform stream
+```
+
+`pipe.async` function takes an async function and an opts object; returns a TransforBlueprint that can be used to create `transform streams`.
+
+If an `Async Function` is passed, it is run on each transform call and results awaited and then enqueud. Backpressure is handled automatically and if `stream` is cancelled, any live `future`s is gracefully shutdown.
+
+```javascript
+
+// Basic async example
+let serverTalker = pipe.async( async function (msg) {
+    let response = await sendToServer( msg );
+    return response;
+  }),
+  rIn = createReadable(),
+  rOut;
+
+rOut = rIn.pipeThrough( new serverTalker );  // {response}, {response}, {response}
+
+```
+
+### chain
+
+```javascript
+chain (
+  ...TransformStream()
+) -> TransformBlueprint // Constructor that returns transform stream
+```
+
+`chain` takes any number of `transform streams` and chains them together and returns a `transform stream` that acts as a composition of the input streams.
+
+```javascript
+
+// Pure funtion example
+let negator = pipe( n => -n ),
+  doubler = pipe( n => 2*n ),
+  composed = chain( new negator, new doubler ),
+  rIn = createReadable(),
+  rOut;
+
+rOut = rIn.pipeThrough( composed );  // -2, -4, -6
+
 ```
