@@ -85,6 +85,16 @@ If you want, you can directly import the es6 modules like so:
 
 ## API Reference
 
+The library only consists of the following functions:
+
+ -  chain
+ -  connect
+ -  flatten
+ -  split
+ -  pipe
+ -  merge
+ -  zip
+
 ### pipe
 
 ```javascript
@@ -106,19 +116,24 @@ If a `Generator Function` is passed, it is consumed entirely on each transform c
 
 // Setup
 let createReadable = () => new ReadableStream({
-  start (controller) {
-    this.data = [1,2,3];
+    start (controller) {
+      this.data = [1,2,3];
 
-    // Kickstart stream
-    controller.enqueue( this.data.pop() );
-  },
-  pull (controller) {
-    if ( !this.data.length )
-      return controller.close()
+      // Kickstart stream
+      controller.enqueue( this.data.pop() );
+    },
+    pull (controller) {
+      if ( !this.data.length )
+        return controller.close()
 
-    controller.enqueue( this.data.pop() );
-  }
-});
+      controller.enqueue( this.data.pop() );
+    }
+  }),
+  createWritable = () => new WritableStream({
+    write (chunk) {
+      console.log( chunk );
+    }
+  });
 
 // Pure funtion example
 let negator = pipe( n => -n ),
@@ -203,4 +218,26 @@ let negator = pipe( n => -n ),
 
 rOut = rIn.pipeThrough( composed );  // -2, -4, -6
 
+```
+
+### connect
+
+```javascript
+connect (
+  ReadableStream() | TransformStream(),
+  ...TransformStream(),
+  <Optional> WritableStream()
+) -> ReadableStream() | Promise()
+```
+
+`connect` takes any number of `transform streams` with an optional `readable` at the head and a `writable` at the tail. It connects them together by applying `pipeThrough` recursively and returns the resulting `readable` that acts as a composition of the input streams.
+
+In case, a `writable` is passed at the tail, the resulting `readable` is `pipeTo`d and the resulting `promise` is returned.
+```javascript
+
+let readable = createReadable(),
+  writable = createWritable(),
+  passThrough = pipe( k => k );
+
+let promise = connect( readable, passThrough, writable );   // 1, 2, 3
 ```
