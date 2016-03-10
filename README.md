@@ -18,9 +18,9 @@ The `core` module contains some basic utility functions to make working with `we
 
  > Large swathes of the web platform are built on streaming data: that is, data that is created, processed, and consumed in an incremental fashion, without ever reading all of it into memory. The Streams Standard provides a common set of APIs for creating and interfacing with such streaming data, embodied in readable streams, writable streams, and transform streams.
 
-The spec is still evolving but have reasched a fairly stable stage with a [reference implementation](https://github.com/whatwg/streams/tree/master/reference-implementation) as well. The API has almost been finalized and `Stream`s are coming to the web very soon!
+The spec is still evolving but has reached a fairly stable stage with a [reference implementation](https://github.com/whatwg/streams/tree/master/reference-implementation) as well. The API has almost been finalized and `Stream`s are coming to the web very soon!
 
-At it's core, the API exposes these three major components:
+At it's core, the API exposes three major components:
 
  - `ReadableStream` encapsulates a source producing values and emits them.
  - `TransformStream` are essentially `{ readable, writable}` pairs that take a function which can be used to transform the values flowing through it.
@@ -28,9 +28,9 @@ At it's core, the API exposes these three major components:
 
  `Stream`s are essentially data structures that handle sequential flow of values. You can split streams, merge them and connect them together in various ways. What's amazing is that, in most cases, they can handle [backpressure](https://streams.spec.whatwg.org/#pipe-chains) automatically, so you don't have to mess with the underlying details.
 
-For further information, the spec is quite informative and easy to read.
+For further information, the spec is quite informative and easy to read. [Jake Archibald](https://github.com/jakearchibald) also wrote a great [blog post](https://jakearchibald.com/2016/streams-ftw/) on them.
 
- **Heads up:** If you're coming from `node` land, web `stream`s are quite a lot different from node `stream`s and incompatible with each other.
+ **Heads up:** If you're coming from `node` land, `web streams` are quite a lot different from `node streams` and incompatible with each other.
 
 ## Installing
 
@@ -115,9 +115,9 @@ If a `Generator Function` is passed, it is consumed entirely on each transform c
 ```javascript
 
 // Setup
-let createReadable = () => new ReadableStream({
+let createReadable = data => new ReadableStream({
     start (controller) {
-      this.data = [1,2,3];
+      this.data = data || [1,2,3];
 
       // Kickstart stream
       controller.enqueue( this.data.pop() );
@@ -240,4 +240,24 @@ let readable = createReadable(),
   passThrough = pipe( k => k );
 
 let promise = connect( readable, passThrough, writable );   // 1, 2, 3
+```
+
+### flatten
+
+```javascript
+flatten (
+  ...ReadableStream()
+) -> ReadableStream()
+```
+
+`flatten` takes any number of `readable streams` and returns a new `readable stream` with chunks enqueued as they are produced by the input streams, in order they are produced.
+
+```javascript
+
+let r1 = createReadable([1,2,3]),
+  r2 = createReadable([4,5,6]),
+  writable = createWritable(),
+  flattened = flatten(r1,r2);
+
+flattened.pipeTo( writable );   // 1,4,2,5,3,6   (order depends on order received so may vary)
 ```
