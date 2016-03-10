@@ -25,4 +25,10 @@ const fns = {
   split
 };
 
+// Export to window
+if ( typeof window !== "undefined")
+  Object.assign( window, {
+    Pipes: fns
+  });
+
 export default fns;

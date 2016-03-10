@@ -50,4 +50,9 @@ var fns = {
   split: _split2.default
 };
 
+// Export to window
+if (typeof window !== "undefined") Object.assign(window, {
+  Pipes: fns
+});
+
 exports.default = fns;
