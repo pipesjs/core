@@ -37,3 +37,7 @@ export default function split( stream, parts=2 ) {
 
   return result;
 }
+
+// Browserify compat
+if ( typeof module !== "undefined" )
+  module.exports = split;

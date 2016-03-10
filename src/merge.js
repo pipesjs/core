@@ -73,3 +73,7 @@ export default function merge(...streams) {
   });
 };
 
+// Browserify compat
+if ( typeof module !== "undefined" )
+  module.exports = merge;
+

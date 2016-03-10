@@ -44,3 +44,7 @@ export default function connect(origin, ...streams) {
   return end;
 }
 
+// Browserify compat
+if ( typeof module !== "undefined" )
+  module.exports = connect;
+

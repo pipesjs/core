@@ -35,3 +35,6 @@ function pipe(fn, opts) {
 
 // Add async support
 pipe.async = _pipeAsync2.default;
+
+// Browserify compat
+if (typeof module !== "undefined") module.exports = pipe;

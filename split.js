@@ -52,3 +52,6 @@ function split(stream) {
 
   return result;
 }
+
+// Browserify compat
+if (typeof module !== "undefined") module.exports = split;

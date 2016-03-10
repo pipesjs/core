@@ -25,3 +25,7 @@ export default function zip(...streams) {
   // return zipped stream
   return merged.pipeThrough( new applier );
 }
+
+// Browserify compat
+if ( typeof module !== "undefined" )
+  module.exports = zip;

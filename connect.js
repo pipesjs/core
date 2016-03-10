@@ -62,8 +62,13 @@ function connect(origin) {
 
   // Return result
   return end;
-} // connect :: Streams... -> ReadableStream | Promise
+}
+
+// Browserify compat
+// connect :: Streams... -> ReadableStream | Promise
 // connect function takes one or more streams
 // and sequentially pipes them to each other,
 // returning the result of the last pipe operation.
 //
+
+if (typeof module !== "undefined") module.exports = connect;

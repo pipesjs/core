@@ -36,3 +36,7 @@ export default function chain(origin, ...streams) {
     writable
   };
 }
+
+// Browserify compat
+if ( typeof module !== "undefined" )
+  module.exports = chain;

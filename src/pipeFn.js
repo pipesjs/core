@@ -45,3 +45,7 @@ export default function pipeFn ( fn, {
   return TransformBlueprint;
 }
 
+// Browserify compat
+if ( typeof module !== "undefined" )
+  module.exports = pipeFn;
+

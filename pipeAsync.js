@@ -99,3 +99,6 @@ function pipeAsync(fn) {
 
   return TransformBlueprint;
 }
+
+// Browserify compat
+if (typeof module !== "undefined") module.exports = pipeAsync;

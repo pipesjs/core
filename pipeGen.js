@@ -211,3 +211,6 @@ function pipeGen(fn) {
 
   return TransformBlueprint;
 }
+
+// Browserify compat
+if (typeof module !== "undefined") module.exports = pipeGen;

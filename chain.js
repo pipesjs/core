@@ -47,3 +47,6 @@ function chain(origin) {
     writable: writable
   };
 }
+
+// Browserify compat
+if (typeof module !== "undefined") module.exports = chain;

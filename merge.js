@@ -113,3 +113,6 @@ function merge() {
     }
   });
 };
+
+// Browserify compat
+if (typeof module !== "undefined") module.exports = merge;

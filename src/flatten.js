@@ -48,5 +48,7 @@ export default function flatten(...streams) {
   });
 };
 
-
+// Browserify compat
+if ( typeof module !== "undefined" )
+  module.exports = flatten;
 
