@@ -48,6 +48,9 @@ function chain(origin) {
     writable: writable
   };
 }
+
+// Browserify compat
+if (typeof module !== "undefined") module.exports = chain;
 },{"./connect":2,"./utils":12}],2:[function(require,module,exports){
 "use strict";
 
@@ -113,11 +116,16 @@ function connect(origin) {
 
   // Return result
   return end;
-} // connect :: Streams... -> ReadableStream | Promise
+}
+
+// Browserify compat
+// connect :: Streams... -> ReadableStream | Promise
 // connect function takes one or more streams
 // and sequentially pipes them to each other,
 // returning the result of the last pipe operation.
 //
+
+if (typeof module !== "undefined") module.exports = connect;
 },{"./utils":12}],3:[function(require,module,exports){
 "use strict";
 
@@ -175,6 +183,9 @@ function flatten() {
     }
   });
 };
+
+// Browserify compat
+if (typeof module !== "undefined") module.exports = flatten;
 },{"./streams":11,"./utils":12}],4:[function(require,module,exports){
 "use strict";
 
@@ -350,6 +361,9 @@ function merge() {
     }
   });
 };
+
+// Browserify compat
+if (typeof module !== "undefined") module.exports = merge;
 },{"./streams":11}],6:[function(require,module,exports){
 "use strict";
 
@@ -388,6 +402,9 @@ function pipe(fn, opts) {
 
 // Add async support
 pipe.async = _pipeAsync2.default;
+
+// Browserify compat
+if (typeof module !== "undefined") module.exports = pipe;
 },{"./pipeAsync":7,"./pipeFn":8,"./pipeGen":9,"./utils":12}],7:[function(require,module,exports){
 "use strict";
 
@@ -490,6 +507,9 @@ function pipeAsync(fn) {
 
   return TransformBlueprint;
 }
+
+// Browserify compat
+if (typeof module !== "undefined") module.exports = pipeAsync;
 },{"./streams":11}],8:[function(require,module,exports){
 "use strict";
 
@@ -561,6 +581,9 @@ function pipeFn(fn) {
 
   return TransformBlueprint;
 }
+
+// Browserify compat
+if (typeof module !== "undefined") module.exports = pipeFn;
 },{"./streams":11}],9:[function(require,module,exports){
 "use strict";
 
@@ -775,6 +798,9 @@ function pipeGen(fn) {
 
   return TransformBlueprint;
 }
+
+// Browserify compat
+if (typeof module !== "undefined") module.exports = pipeGen;
 },{"./streams":11}],10:[function(require,module,exports){
 "use strict";
 
@@ -830,6 +856,9 @@ function split(stream) {
 
   return result;
 }
+
+// Browserify compat
+if (typeof module !== "undefined") module.exports = split;
 },{}],11:[function(require,module,exports){
 "use strict";
 
