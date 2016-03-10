@@ -30,6 +30,15 @@
 <a id="pipes-core" class="anchor" href="#pipes-core" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>pipes/ core</h1>
 
 <h2>
+<a id="contents" class="anchor" href="#contents" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Contents</h2>
+
+<ul>
+<li><a href="#about">About</a></li>
+<li><a href="#installing">Installing</a></li>
+<li><a href="#api-reference">API Reference</a></li>
+</ul>
+
+<h2>
 <a id="about" class="anchor" href="#about" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>About</h2>
 
 <p>The <code>core</code> module contains some basic utility functions to make working with <code>web streams</code> a lot easier. Here's more about <code>Web Streams</code> from the <a href="https://streams.spec.whatwg.org">spec</a> itself:</p>
@@ -102,6 +111,157 @@
     <span class="pl-k">import</span> <span class="pl-smi">pipes</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">"</span>@pipes/core/src<span class="pl-pds">"</span></span>;
     <span class="pl-k">import</span> { <span class="pl-smi">flatten</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">"</span>@pipes/core/src<span class="pl-pds">"</span></span>;
     <span class="pl-k">import</span> <span class="pl-smi">flatten</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">"</span>@pipes/core/src/flatten<span class="pl-pds">"</span></span>;</pre></div>
+
+<h2>
+<a id="api-reference" class="anchor" href="#api-reference" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>API Reference</h2>
+
+<p>The library only consists of the following functions:</p>
+
+<ul>
+<li> chain</li>
+<li> connect</li>
+<li> flatten</li>
+<li> split</li>
+<li> pipe</li>
+<li> merge</li>
+<li> zip</li>
+</ul>
+
+<h3>
+<a id="pipe" class="anchor" href="#pipe" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>pipe</h3>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-en">pipe</span> (
+  <span class="pl-c1">Function</span> <span class="pl-k">|</span> Generator <span class="pl-c1">Function</span>,
+  <span class="pl-c1">Object</span> {
+    init,   <span class="pl-c">// value to initiate transform stream</span>
+    writableStrategy,
+    readableStrategy    <span class="pl-c">// instances of queuing strategies</span>
+  }
+) <span class="pl-k">-</span><span class="pl-k">&gt;</span> TransformBlueprint <span class="pl-c">// Constructor that returns transform stream</span></pre></div>
+
+<p><code>pipe</code> function takes a transform function or generator and an opts object; returns a TransforBlueprint that can be used to create <code>transform streams</code>.</p>
+
+<p>If a <code>Generator Function</code> is passed, it is consumed entirely on each transform call and results enqueud. Backpressure is handled automatically and if <code>stream</code> is cancelled, any live <code>generator</code> is gracefully shutdown. On shutdown, <code>generator</code> is sent <code>true</code> as a signal to prepare shutdown.</p>
+
+<div class="highlight highlight-source-js"><pre>
+<span class="pl-c">// Setup</span>
+<span class="pl-k">let</span> <span class="pl-en">createReadable</span> <span class="pl-k">=</span> () <span class="pl-k">=&gt;</span> <span class="pl-k">new</span> <span class="pl-en">ReadableStream</span>({
+    <span class="pl-en">start</span> (<span class="pl-smi">controller</span>) {
+      <span class="pl-v">this</span>.<span class="pl-c1">data</span> <span class="pl-k">=</span> [<span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>];
+
+      <span class="pl-c">// Kickstart stream</span>
+      <span class="pl-smi">controller</span>.<span class="pl-en">enqueue</span>( <span class="pl-v">this</span>.<span class="pl-c1">data</span>.<span class="pl-c1">pop</span>() );
+    },
+    <span class="pl-en">pull</span> (<span class="pl-smi">controller</span>) {
+      <span class="pl-k">if</span> ( <span class="pl-k">!</span><span class="pl-v">this</span>.<span class="pl-c1">data</span>.<span class="pl-c1">length</span> )
+        <span class="pl-k">return</span> <span class="pl-smi">controller</span>.<span class="pl-c1">close</span>()
+
+      <span class="pl-smi">controller</span>.<span class="pl-en">enqueue</span>( <span class="pl-v">this</span>.<span class="pl-c1">data</span>.<span class="pl-c1">pop</span>() );
+    }
+  }),
+  <span class="pl-en">createWritable</span> <span class="pl-k">=</span> () <span class="pl-k">=&gt;</span> <span class="pl-k">new</span> <span class="pl-en">WritableStream</span>({
+    <span class="pl-en">write</span> (<span class="pl-smi">chunk</span>) {
+      <span class="pl-en">console</span>.<span class="pl-c1">log</span>( chunk );
+    }
+  });
+
+<span class="pl-c">// Pure funtion example</span>
+<span class="pl-k">let</span> negator <span class="pl-k">=</span> <span class="pl-en">pipe</span>( n <span class="pl-k">=&gt;</span> <span class="pl-k">-</span>n ),
+  rIn <span class="pl-k">=</span> <span class="pl-en">createReadable</span>(),
+  rOut;
+
+rOut <span class="pl-k">=</span> <span class="pl-smi">rIn</span>.<span class="pl-en">pipeThrough</span>( <span class="pl-k">new</span> <span class="pl-en">negator</span> );  <span class="pl-c">// -1, -2, -3</span>
+
+
+<span class="pl-c">// Basic generator example</span>
+<span class="pl-k">let</span> doubler <span class="pl-k">=</span> <span class="pl-en">pipe</span>( <span class="pl-k">function*</span> (<span class="pl-smi">v</span>) {
+    <span class="pl-k">yield</span> v;
+    <span class="pl-k">yield</span> v;
+  }),
+  rIn <span class="pl-k">=</span> <span class="pl-en">createReadable</span>(),
+  rOut;
+
+rOut <span class="pl-k">=</span> <span class="pl-smi">rIn</span>.<span class="pl-en">pipeThrough</span>( <span class="pl-k">new</span> <span class="pl-en">doubler</span> );  <span class="pl-c">// 1, 1, 2, 2, 3, 3</span>
+
+
+<span class="pl-c">// Infinite generator example</span>
+
+<span class="pl-k">let</span> inf <span class="pl-k">=</span> <span class="pl-en">pipe</span>( <span class="pl-k">function*</span> (<span class="pl-smi">v</span>) {
+    <span class="pl-c">// Close on shutdown signal</span>
+    <span class="pl-k">while</span>( <span class="pl-k">!</span>( <span class="pl-k">yield</span> v ));
+  }, {
+    init<span class="pl-k">:</span> <span class="pl-c1">1</span>
+  });
+
+<span class="pl-k">new</span> <span class="pl-en">inf</span>;    <span class="pl-c">// 1, 1, 1, 1...</span></pre></div>
+
+<h3>
+<a id="pipeasync" class="anchor" href="#pipeasync" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>pipe.async</h3>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">pipe</span>.<span class="pl-en">async</span> (
+  Async <span class="pl-c1">Function</span>,
+  <span class="pl-c1">Object</span> {
+    init,   <span class="pl-c">// value to initiate transform stream</span>
+    writableStrategy,
+    readableStrategy    <span class="pl-c">// instances of queuing strategies</span>
+  }
+) <span class="pl-k">-</span><span class="pl-k">&gt;</span> TransformBlueprint <span class="pl-c">// Constructor that returns transform stream</span></pre></div>
+
+<p><code>pipe.async</code> function takes an async function and an opts object; returns a TransforBlueprint that can be used to create <code>transform streams</code>.</p>
+
+<p>If an <code>Async Function</code> is passed, it is run on each transform call and results awaited and then enqueud. Backpressure is handled automatically and if <code>stream</code> is cancelled, any live <code>future</code>s is gracefully shutdown.</p>
+
+<div class="highlight highlight-source-js"><pre>
+<span class="pl-c">// Basic async example</span>
+<span class="pl-k">let</span> serverTalker <span class="pl-k">=</span> <span class="pl-smi">pipe</span>.<span class="pl-en">async</span>( <span class="pl-k">async</span> <span class="pl-k">function</span> (<span class="pl-smi">msg</span>) {
+    <span class="pl-k">let</span> response <span class="pl-k">=</span> <span class="pl-k">await</span> <span class="pl-en">sendToServer</span>( msg );
+    <span class="pl-k">return</span> response;
+  }),
+  rIn <span class="pl-k">=</span> <span class="pl-en">createReadable</span>(),
+  rOut;
+
+rOut <span class="pl-k">=</span> <span class="pl-smi">rIn</span>.<span class="pl-en">pipeThrough</span>( <span class="pl-k">new</span> <span class="pl-en">serverTalker</span> );  <span class="pl-c">// {response}, {response}, {response}</span>
+</pre></div>
+
+<h3>
+<a id="chain" class="anchor" href="#chain" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>chain</h3>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-en">chain</span> (
+  <span class="pl-k">...</span><span class="pl-en">TransformStream</span>()
+) <span class="pl-k">-</span><span class="pl-k">&gt;</span> { readable, writable }</pre></div>
+
+<p><code>chain</code> takes any number of <code>transform streams</code> and chains them together and returns a <code>transform stream</code> that acts as a composition of the input streams.</p>
+
+<div class="highlight highlight-source-js"><pre>
+<span class="pl-c">// Pure funtion example</span>
+<span class="pl-k">let</span> negator <span class="pl-k">=</span> <span class="pl-en">pipe</span>( n <span class="pl-k">=&gt;</span> <span class="pl-k">-</span>n ),
+  doubler <span class="pl-k">=</span> <span class="pl-en">pipe</span>( n <span class="pl-k">=&gt;</span> <span class="pl-c1">2</span><span class="pl-k">*</span>n ),
+  composed <span class="pl-k">=</span> <span class="pl-en">chain</span>( <span class="pl-k">new</span> <span class="pl-en">negator</span>, <span class="pl-k">new</span> <span class="pl-en">doubler</span> ),
+  rIn <span class="pl-k">=</span> <span class="pl-en">createReadable</span>(),
+  rOut;
+
+rOut <span class="pl-k">=</span> <span class="pl-smi">rIn</span>.<span class="pl-en">pipeThrough</span>( composed );  <span class="pl-c">// -2, -4, -6</span>
+</pre></div>
+
+<h3>
+<a id="connect" class="anchor" href="#connect" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>connect</h3>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-en">connect</span> (
+  <span class="pl-en">ReadableStream</span>() <span class="pl-k">|</span> <span class="pl-en">TransformStream</span>(),
+  <span class="pl-k">...</span><span class="pl-en">TransformStream</span>(),
+  <span class="pl-k">&lt;</span>Optional<span class="pl-k">&gt;</span> <span class="pl-en">WritableStream</span>()
+) <span class="pl-k">-</span><span class="pl-k">&gt;</span> <span class="pl-en">ReadableStream</span>() <span class="pl-k">|</span> <span class="pl-en">Promise</span>()</pre></div>
+
+<p><code>connect</code> takes any number of <code>transform streams</code> with an optional <code>readable</code> at the head and a <code>writable</code> at the tail. It connects them together by applying <code>pipeThrough</code> recursively and returns the resulting <code>readable</code> that acts as a composition of the input streams.</p>
+
+<p>In case, a <code>writable</code> is passed at the tail, the resulting <code>readable</code> is <code>pipeTo</code>d and the resulting <code>promise</code> is returned.</p>
+
+<div class="highlight highlight-source-js"><pre>
+<span class="pl-k">let</span> readable <span class="pl-k">=</span> <span class="pl-en">createReadable</span>(),
+  writable <span class="pl-k">=</span> <span class="pl-en">createWritable</span>(),
+  passThrough <span class="pl-k">=</span> <span class="pl-en">pipe</span>( k <span class="pl-k">=&gt;</span> k );
+
+<span class="pl-k">let</span> promise <span class="pl-k">=</span> <span class="pl-en">connect</span>( readable, passThrough, writable );   <span class="pl-c">// 1, 2, 3</span></pre></div>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/pipesjs/core">PipesJs/Core</a> is maintained by <a href="https://github.com/pipesjs">pipesjs</a>.</span>
