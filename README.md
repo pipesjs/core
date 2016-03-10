@@ -187,7 +187,7 @@ rOut = rIn.pipeThrough( new serverTalker );  // {response}, {response}, {respons
 ```javascript
 chain (
   ...TransformStream()
-) -> TransformBlueprint // Constructor that returns transform stream
+) -> { readable, writable }
 ```
 
 `chain` takes any number of `transform streams` and chains them together and returns a `transform stream` that acts as a composition of the input streams.
