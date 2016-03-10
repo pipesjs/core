@@ -6,6 +6,11 @@
 
 # pipes/ core
 
+## TOC
+
+ - [About](#about)
+ - [Installing](#installing)
+
 ## About
 
 The `core` module contains some basic utility functions to make working with `web streams` a lot easier. Here's more about `Web Streams` from the [spec](https://streams.spec.whatwg.org) itself:
