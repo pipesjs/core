@@ -228,6 +228,11 @@ var fns = {
   split: _split2.default
 };
 
+// Export to window
+if (typeof window !== "undefined") Object.assign(window, {
+  Pipes: fns
+});
+
 exports.default = fns;
 },{"./chain":1,"./connect":2,"./flatten":3,"./merge":5,"./pipe":12,"./split":16}],5:[function(require,module,exports){
 "use strict";
