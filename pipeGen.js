@@ -32,13 +32,17 @@ var GenObjManager = function () {
     _classCallCheck(this, GenObjManager);
 
     var done = undefined,
+        condEnqueue = function condEnqueue(v) {
+      if (v !== void 0) enqueue(v);
+    },
         promise = new Promise(function (resolve) {
       done = resolve;
     });
 
     // Add props
     Object.assign(this, {
-      done: done, gen: gen, enqueue: enqueue, readable: readable, promise: promise,
+      done: done, gen: gen, readable: readable, promise: promise,
+      enqueue: condEnqueue,
       running: false
     });
   }

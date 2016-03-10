@@ -16,11 +16,16 @@ class GenObjManager {
   constructor ( gen, enqueue, readable ) {
     let
       done,
+      condEnqueue = v => {
+        if ( v !== void 0 )
+          enqueue( v );
+      },
       promise = new Promise( resolve => { done = resolve });
 
     // Add props
     Object.assign( this, {
-      done, gen, enqueue, readable, promise,
+      done, gen, readable, promise,
+      enqueue: condEnqueue,
       running: false
     });
   }

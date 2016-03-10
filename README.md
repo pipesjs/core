@@ -113,6 +113,8 @@ pipe (
 
 If a `Generator Function` is passed, it is consumed entirely on each transform call and results enqueud. Backpressure is handled automatically and if `stream` is cancelled, any live `generator` is gracefully shutdown. On shutdown, `generator` is sent `true` as a signal to prepare shutdown.
 
+If the function doesn't return anything or returns `undefined`, nothing is written on the stream.
+
 ```javascript
 
 // Setup
@@ -183,6 +185,8 @@ pipe.async (
 `pipe.async` function takes an async function and an opts object; returns a TransforBlueprint that can be used to create `transform streams`.
 
 If an `Async Function` is passed, it is run on each transform call and results awaited and then enqueud. Backpressure is handled automatically and if `stream` is cancelled, any live `future`s is gracefully shutdown.
+
+If the function doesn't return anything or returns `undefined`, nothing is written on the stream.
 
 ```javascript
 

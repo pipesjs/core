@@ -33,7 +33,11 @@ function pipeFn(fn) {
     // Run function and enqueue result
 
     transform: function transform(chunk, enqueue, done) {
-      enqueue(fn(chunk));
+      var condEnqueue = function condEnqueue(v) {
+        if (v !== void 0) enqueue(v);
+      };
+
+      condEnqueue(fn(chunk));
 
       return done();
     },

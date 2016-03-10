@@ -26,6 +26,10 @@ export default function pipeAsync ( fn, {
       let
         self = transformer,
         future = fn( chunk ),
+        condEnqueue = v => {
+          if ( v !== void 0 )
+            enqueue( v );
+        },
 
         // Get index of current future
         findex = self._unfulfilledFutures.length;
@@ -35,7 +39,7 @@ export default function pipeAsync ( fn, {
 
       // Proceed to enqueue
       future
-        .then( enqueue, () => {
+        .then( condEnqueue, () => {
           // Signal error to stream
           throw new Error
         })
@@ -48,11 +52,15 @@ export default function pipeAsync ( fn, {
     },
 
     flush ( enqueue, close ) {
-      let self = transformer;
+      let self = transformer,
+        condEnqueue = v => {
+          if ( v !== void 0 )
+            enqueue( v );
+        };
 
       // Check if anything is left
       Promise.all( self._unfulfilledFutures )
-        .then( vs => vs.map( enqueue ))
+        .then( vs => vs.map( condEnqueue ))
         .done( close );
     },
 

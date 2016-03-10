@@ -447,6 +447,9 @@ function pipeAsync(fn) {
       // Run async fn
       var self = transformer,
           future = fn(chunk),
+          condEnqueue = function condEnqueue(v) {
+        if (v !== void 0) enqueue(v);
+      },
 
 
       // Get index of current future
@@ -456,7 +459,7 @@ function pipeAsync(fn) {
       self._unfulfilledFutures.push(future);
 
       // Proceed to enqueue
-      future.then(enqueue, function () {
+      future.then(condEnqueue, function () {
         // Signal error to stream
         throw new Error();
       })
@@ -469,11 +472,14 @@ function pipeAsync(fn) {
       return future;
     },
     flush: function flush(enqueue, close) {
-      var self = transformer;
+      var self = transformer,
+          condEnqueue = function condEnqueue(v) {
+        if (v !== void 0) enqueue(v);
+      };
 
       // Check if anything is left
       Promise.all(self._unfulfilledFutures).then(function (vs) {
-        return vs.map(enqueue);
+        return vs.map(condEnqueue);
       }).done(close);
     },
 
@@ -546,7 +552,11 @@ function pipeFn(fn) {
     // Run function and enqueue result
 
     transform: function transform(chunk, enqueue, done) {
-      enqueue(fn(chunk));
+      var condEnqueue = function condEnqueue(v) {
+        if (v !== void 0) enqueue(v);
+      };
+
+      condEnqueue(fn(chunk));
 
       return done();
     },
@@ -619,13 +629,17 @@ var GenObjManager = function () {
     _classCallCheck(this, GenObjManager);
 
     var done = undefined,
+        condEnqueue = function condEnqueue(v) {
+      if (v !== void 0) enqueue(v);
+    },
         promise = new Promise(function (resolve) {
       done = resolve;
     });
 
     // Add props
     Object.assign(this, {
-      done: done, gen: gen, enqueue: enqueue, readable: readable, promise: promise,
+      done: done, gen: gen, readable: readable, promise: promise,
+      enqueue: condEnqueue,
       running: false
     });
   }
