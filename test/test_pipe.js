@@ -49,6 +49,26 @@ test("check async function", done => {
   });
 });
 
+test("check async promise function", done => {
+  let readable, writable, transform;
+
+  // Create test streams
+  readable = createTestReadable( [1,2,3] );
+  writable = createTestWritable( assert );
+  transform = pipe.async( function (k) {
+    // Return promie that resolves to k
+    return till( 200, k );
+  });
+
+  // End case
+  broker.on(writable.signals.close, done);
+
+  // Connect the streams
+  assert.doesNotThrow( () => {
+    connect( readable, (new transform), writable );
+  });
+});
+
 test("check gen function", done => {
   let readable, writable, transform, counter = 0;
 
