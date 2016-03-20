@@ -111,7 +111,7 @@ pipe (
 
 `pipe` function takes a transform function or generator and an opts object; returns a TransforBlueprint that can be used to create `transform streams`.
 
-If a `Generator Function` is passed, it is consumed entirely on each transform call and results enqueud. Backpressure is handled automatically and if `stream` is cancelled, any live `generator` is gracefully shutdown. On shutdown, `generator` is sent `true` as a signal to prepare shutdown.
+If a `Generator Function` is passed, it is consumed entirely on each transform call and results enqueued. Backpressure is handled automatically and if `stream` is cancelled, any live `generator` is gracefully shutdown. On shutdown, `generator` is sent `true` as a signal to prepare shutdown.
 
 If the function doesn't return anything or returns `undefined`, nothing is written on the stream.
 
@@ -173,7 +173,7 @@ new inf;    // 1, 1, 1, 1...
 
 ```javascript
 pipe.async (
-  Async Function,
+  Async Function | Function -> Promise(),
   Object {
     init,   // value to initiate transform stream
     writableStrategy,
@@ -182,9 +182,13 @@ pipe.async (
 ) -> TransformBlueprint // Constructor that returns transform stream
 ```
 
-`pipe.async` function takes an async function and an opts object; returns a TransforBlueprint that can be used to create `transform streams`.
+`pipe.async` function takes an async function or a function that returns a promise and an opts object; returns a TransforBlueprint that can be used to create `transform streams`.
 
-If an `Async Function` is passed, it is run on each transform call and results awaited and then enqueud. Backpressure is handled automatically and if `stream` is cancelled, any live `future`s is gracefully shutdown.
+If an `Async Function` is passed, it is run on each transform call and results awaited and then enqueued.
+
+If a `Function` is passed that returns a `promise`. The value that the promise resolves to is enqueued.
+
+Backpressure is handled automatically and if `stream` is cancelled, any live `future`s is gracefully shutdown.
 
 If the function doesn't return anything or returns `undefined`, nothing is written on the stream.
 
@@ -193,6 +197,18 @@ If the function doesn't return anything or returns `undefined`, nothing is writt
 // Basic async example
 let serverTalker = pipe.async( async function (msg) {
     let response = await sendToServer( msg );
+    return response;
+  }),
+  rIn = createReadable(),
+  rOut;
+
+rOut = rIn.pipeThrough( new serverTalker );  // {response}, {response}, {response}
+
+// Basic promise example
+let serverTalker = pipe.async( function (msg) {
+    let response = new Promise( resolve => {
+      sendToServer( msg, resolve );
+    });
     return response;
   }),
   rIn = createReadable(),
