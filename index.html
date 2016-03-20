@@ -150,13 +150,13 @@
 
 <p><code>pipe</code> function takes a transform function or generator and an opts object; returns a TransforBlueprint that can be used to create <code>transform streams</code>.</p>
 
-<p>If a <code>Generator Function</code> is passed, it is consumed entirely on each transform call and results enqueud. Backpressure is handled automatically and if <code>stream</code> is cancelled, any live <code>generator</code> is gracefully shutdown. On shutdown, <code>generator</code> is sent <code>true</code> as a signal to prepare shutdown.</p>
+<p>If a <code>Generator Function</code> is passed, it is consumed entirely on each transform call and results enqueued. Backpressure is handled automatically and if <code>stream</code> is cancelled, any live <code>generator</code> is gracefully shutdown. On shutdown, <code>generator</code> is sent <code>true</code> as a signal to prepare shutdown.</p>
 
 <p>If the function doesn't return anything or returns <code>undefined</code>, nothing is written on the stream.</p>
 
 <div class="highlight highlight-source-js"><pre>
 <span class="pl-c">// Setup</span>
-<span class="pl-k">let</span> createReadable <span class="pl-k">=</span> data <span class="pl-k">=&gt;</span> <span class="pl-k">new</span> <span class="pl-en">ReadableStream</span>({
+<span class="pl-k">let</span> <span class="pl-en">createReadable</span> <span class="pl-k">=</span> <span class="pl-smi">data</span> <span class="pl-k">=&gt;</span> <span class="pl-k">new</span> <span class="pl-en">ReadableStream</span>({
     <span class="pl-en">start</span> (<span class="pl-smi">controller</span>) {
       <span class="pl-v">this</span>.<span class="pl-c1">data</span> <span class="pl-k">=</span> data <span class="pl-k">||</span> [<span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>];
 
@@ -177,7 +177,7 @@
   });
 
 <span class="pl-c">// Pure funtion example</span>
-<span class="pl-k">let</span> negator <span class="pl-k">=</span> <span class="pl-en">pipe</span>( n <span class="pl-k">=&gt;</span> <span class="pl-k">-</span>n ),
+<span class="pl-k">let</span> negator <span class="pl-k">=</span> <span class="pl-en">pipe</span>( <span class="pl-smi">n</span> <span class="pl-k">=&gt;</span> <span class="pl-k">-</span>n ),
   rIn <span class="pl-k">=</span> <span class="pl-en">createReadable</span>(),
   rOut;
 
@@ -185,7 +185,7 @@ rOut <span class="pl-k">=</span> <span class="pl-smi">rIn</span>.<span class="pl
 
 
 <span class="pl-c">// Basic generator example</span>
-<span class="pl-k">let</span> doubler <span class="pl-k">=</span> <span class="pl-en">pipe</span>( <span class="pl-k">function*</span> (<span class="pl-smi">v</span>) {
+<span class="pl-k">let</span> doubler <span class="pl-k">=</span> <span class="pl-en">pipe</span>( <span class="pl-k">function</span><span class="pl-k">*</span> (<span class="pl-smi">v</span>) {
     <span class="pl-k">yield</span> v;
     <span class="pl-k">yield</span> v;
   }),
@@ -197,7 +197,7 @@ rOut <span class="pl-k">=</span> <span class="pl-smi">rIn</span>.<span class="pl
 
 <span class="pl-c">// Infinite generator example</span>
 
-<span class="pl-k">let</span> inf <span class="pl-k">=</span> <span class="pl-en">pipe</span>( <span class="pl-k">function*</span> (<span class="pl-smi">v</span>) {
+<span class="pl-k">let</span> inf <span class="pl-k">=</span> <span class="pl-en">pipe</span>( <span class="pl-k">function</span><span class="pl-k">*</span> (<span class="pl-smi">v</span>) {
     <span class="pl-c">// Close on shutdown signal</span>
     <span class="pl-k">while</span>( <span class="pl-k">!</span>( <span class="pl-k">yield</span> v ));
   }, {
@@ -210,7 +210,7 @@ rOut <span class="pl-k">=</span> <span class="pl-smi">rIn</span>.<span class="pl
 <a id="pipeasync" class="anchor" href="#pipeasync" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>pipe.async</h3>
 
 <div class="highlight highlight-source-js"><pre><span class="pl-smi">pipe</span>.<span class="pl-en">async</span> (
-  Async <span class="pl-c1">Function</span>,
+  Async <span class="pl-c1">Function</span> <span class="pl-k">|</span> <span class="pl-c1">Function</span> <span class="pl-k">-</span><span class="pl-k">&gt;</span> <span class="pl-en">Promise</span>(),
   <span class="pl-c1">Object</span> {
     init,   <span class="pl-c">// value to initiate transform stream</span>
     writableStrategy,
@@ -218,9 +218,13 @@ rOut <span class="pl-k">=</span> <span class="pl-smi">rIn</span>.<span class="pl
   }
 ) <span class="pl-k">-</span><span class="pl-k">&gt;</span> TransformBlueprint <span class="pl-c">// Constructor that returns transform stream</span></pre></div>
 
-<p><code>pipe.async</code> function takes an async function and an opts object; returns a TransforBlueprint that can be used to create <code>transform streams</code>.</p>
+<p><code>pipe.async</code> function takes an async function or a function that returns a promise and an opts object; returns a TransforBlueprint that can be used to create <code>transform streams</code>.</p>
 
-<p>If an <code>Async Function</code> is passed, it is run on each transform call and results awaited and then enqueud. Backpressure is handled automatically and if <code>stream</code> is cancelled, any live <code>future</code>s is gracefully shutdown.</p>
+<p>If an <code>Async Function</code> is passed, it is run on each transform call and results awaited and then enqueued.</p>
+
+<p>If a <code>Function</code> is passed that returns a <code>promise</code>. The value that the promise resolves to is enqueued.</p>
+
+<p>Backpressure is handled automatically and if <code>stream</code> is cancelled, any live <code>future</code>s is gracefully shutdown.</p>
 
 <p>If the function doesn't return anything or returns <code>undefined</code>, nothing is written on the stream.</p>
 
@@ -228,6 +232,18 @@ rOut <span class="pl-k">=</span> <span class="pl-smi">rIn</span>.<span class="pl
 <span class="pl-c">// Basic async example</span>
 <span class="pl-k">let</span> serverTalker <span class="pl-k">=</span> <span class="pl-smi">pipe</span>.<span class="pl-en">async</span>( <span class="pl-k">async</span> <span class="pl-k">function</span> (<span class="pl-smi">msg</span>) {
     <span class="pl-k">let</span> response <span class="pl-k">=</span> <span class="pl-k">await</span> <span class="pl-en">sendToServer</span>( msg );
+    <span class="pl-k">return</span> response;
+  }),
+  rIn <span class="pl-k">=</span> <span class="pl-en">createReadable</span>(),
+  rOut;
+
+rOut <span class="pl-k">=</span> <span class="pl-smi">rIn</span>.<span class="pl-en">pipeThrough</span>( <span class="pl-k">new</span> <span class="pl-en">serverTalker</span> );  <span class="pl-c">// {response}, {response}, {response}</span>
+
+<span class="pl-c">// Basic promise example</span>
+<span class="pl-k">let</span> serverTalker <span class="pl-k">=</span> <span class="pl-smi">pipe</span>.<span class="pl-en">async</span>( <span class="pl-k">function</span> (<span class="pl-smi">msg</span>) {
+    <span class="pl-k">let</span> response <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Promise</span>( <span class="pl-smi">resolve</span> <span class="pl-k">=&gt;</span> {
+      <span class="pl-en">sendToServer</span>( msg, resolve );
+    });
     <span class="pl-k">return</span> response;
   }),
   rIn <span class="pl-k">=</span> <span class="pl-en">createReadable</span>(),
@@ -247,8 +263,8 @@ rOut <span class="pl-k">=</span> <span class="pl-smi">rIn</span>.<span class="pl
 
 <div class="highlight highlight-source-js"><pre>
 <span class="pl-c">// Pure funtion example</span>
-<span class="pl-k">let</span> negator <span class="pl-k">=</span> <span class="pl-en">pipe</span>( n <span class="pl-k">=&gt;</span> <span class="pl-k">-</span>n ),
-  doubler <span class="pl-k">=</span> <span class="pl-en">pipe</span>( n <span class="pl-k">=&gt;</span> <span class="pl-c1">2</span><span class="pl-k">*</span>n ),
+<span class="pl-k">let</span> negator <span class="pl-k">=</span> <span class="pl-en">pipe</span>( <span class="pl-smi">n</span> <span class="pl-k">=&gt;</span> <span class="pl-k">-</span>n ),
+  doubler <span class="pl-k">=</span> <span class="pl-en">pipe</span>( <span class="pl-smi">n</span> <span class="pl-k">=&gt;</span> <span class="pl-c1">2</span><span class="pl-k">*</span>n ),
   composed <span class="pl-k">=</span> <span class="pl-en">chain</span>( <span class="pl-k">new</span> <span class="pl-en">negator</span>, <span class="pl-k">new</span> <span class="pl-en">doubler</span> ),
   rIn <span class="pl-k">=</span> <span class="pl-en">createReadable</span>(),
   rOut;
@@ -272,7 +288,7 @@ rOut <span class="pl-k">=</span> <span class="pl-smi">rIn</span>.<span class="pl
 <div class="highlight highlight-source-js"><pre>
 <span class="pl-k">let</span> readable <span class="pl-k">=</span> <span class="pl-en">createReadable</span>(),
   writable <span class="pl-k">=</span> <span class="pl-en">createWritable</span>(),
-  passThrough <span class="pl-k">=</span> <span class="pl-en">pipe</span>( k <span class="pl-k">=&gt;</span> k );
+  passThrough <span class="pl-k">=</span> <span class="pl-en">pipe</span>( <span class="pl-smi">k</span> <span class="pl-k">=&gt;</span> k );
 
 <span class="pl-k">let</span> promise <span class="pl-k">=</span> <span class="pl-en">connect</span>( readable, passThrough, writable );   <span class="pl-c">// 1, 2, 3</span></pre></div>
 
