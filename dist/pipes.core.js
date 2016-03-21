@@ -4,6 +4,125 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = accumulate;
+
+var _streams = require("./streams");
+
+var _utils = require("./utils");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } // accumulate :: Function -> InitValue -> { readable, writable }
+// accumulate function takes a reducer function,
+// and an optional inital value.
+//
+// Returns a readable, writable pair that consumes piped
+// stream, combining the values with the reducer
+// and enqueues the result.
+//
+// reducer :: PrevValue -> CurrValue -> NextValue
+// reducer function gets:
+//
+// PrevValue: the previous value or InitValue (if supplied)
+// CurrValue: the current value being processed.
+//
+// that returns NextValue which in turn becomes PrevValue
+// for the next iteration until the input stream is
+// entirely consumed.
+//
+
+var compatibilityError = "\n    accumulate takes a reducing function\n  ";
+
+function accumulate(reducer, init) {
+  // check if reducer is a function
+  if (!(0, _utils.isFunction)(reducer)) throw new Error(compatibilityError);
+
+  var ReadableWritable = function ReadableWritable() {
+    _classCallCheck(this, ReadableWritable);
+
+    // Init
+    var result = init,
+        readable = undefined,
+        writable = undefined,
+        done = undefined,
+        resolved = undefined,
+        rejected = undefined,
+        cancelled = undefined;
+
+    // Create done promise
+    done = new Promise(function (resolve, reject) {
+      resolved = resolve;
+      rejected = reject;
+    });
+
+    // writable
+    writable = new _streams.WritableStream({
+      start: function start(err) {
+        // Reject if error
+        done.catch(rejected);
+      },
+      write: function write(chunk) {
+        // if init not passed, set result as chunk
+        if (result === void 0) {
+          result = chunk;
+          return;
+        }
+
+        // else, reduce and set result
+        result = reducer(result, chunk);
+      },
+      close: function close() {
+        resolved(result);
+      },
+
+
+      abort: rejected
+    });
+
+    // readable
+    readable = new _streams.ReadableStream({
+      start: function start(controller) {
+
+        // Chain enqueue and done
+        var finished = done.then(
+        // Enqueue value if stream not cancelled
+        function (val) {
+          if (!cancelled) controller.enqueue(val);
+        }, controller.error.bind(controller));
+
+        // Close when finished
+        finished.then(controller.close.bind(controller));
+      },
+      cancel: function cancel(reason) {
+        // Set flag
+        cancelled = true;
+
+        // Close writable
+        writable.close();
+
+        // Resolve promise
+        resolved(reason);
+      }
+    });
+
+    // Return { readable, writable } pair
+    Object.assign(this, {
+      readable: readable, writable: writable
+    });
+  };
+
+  // Return ReadableWritable blueprint
+
+
+  return ReadableWritable;
+}
+
+// Browserify compat
+if (typeof module !== "undefined") module.exports = accumulate;
+},{"./streams":12,"./utils":13}],2:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.default = chain;
 
 var _connect = require("./connect");
@@ -51,7 +170,7 @@ function chain(origin) {
 
 // Browserify compat
 if (typeof module !== "undefined") module.exports = chain;
-},{"./connect":2,"./utils":12}],2:[function(require,module,exports){
+},{"./connect":3,"./utils":13}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -126,7 +245,7 @@ function connect(origin) {
 //
 
 if (typeof module !== "undefined") module.exports = connect;
-},{"./utils":12}],3:[function(require,module,exports){
+},{"./utils":13}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -186,13 +305,17 @@ function flatten() {
 
 // Browserify compat
 if (typeof module !== "undefined") module.exports = flatten;
-},{"./streams":11,"./utils":12}],4:[function(require,module,exports){
+},{"./streams":12,"./utils":13}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.split = exports.pipe = exports.merge = exports.flatten = exports.chain = exports.connect = undefined;
+exports.split = exports.pipe = exports.merge = exports.flatten = exports.chain = exports.connect = exports.accumulate = undefined;
+
+var _accumulate = require("./accumulate");
+
+var _accumulate2 = _interopRequireDefault(_accumulate);
 
 var _connect = require("./connect");
 
@@ -221,6 +344,7 @@ var _split2 = _interopRequireDefault(_split);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Exports
+exports.accumulate = _accumulate2.default;
 exports.connect = _connect2.default;
 exports.chain = _chain2.default;
 exports.flatten = _flatten2.default;
@@ -231,6 +355,7 @@ exports.split = _split2.default;
 // Default exports
 
 var fns = {
+  accumulate: _accumulate2.default,
   connect: _connect2.default,
   chain: _chain2.default,
   flatten: _flatten2.default,
@@ -245,7 +370,7 @@ if (typeof window !== "undefined") Object.assign(window, {
 });
 
 exports.default = fns;
-},{"./chain":1,"./connect":2,"./flatten":3,"./merge":5,"./pipe":6,"./split":10}],5:[function(require,module,exports){
+},{"./accumulate":1,"./chain":2,"./connect":3,"./flatten":4,"./merge":6,"./pipe":7,"./split":11}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -364,7 +489,7 @@ function merge() {
 
 // Browserify compat
 if (typeof module !== "undefined") module.exports = merge;
-},{"./streams":11}],6:[function(require,module,exports){
+},{"./streams":12}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -405,7 +530,7 @@ pipe.async = _pipeAsync2.default;
 
 // Browserify compat
 if (typeof module !== "undefined") module.exports = pipe;
-},{"./pipeAsync":7,"./pipeFn":8,"./pipeGen":9,"./utils":12}],7:[function(require,module,exports){
+},{"./pipeAsync":8,"./pipeFn":9,"./pipeGen":10,"./utils":13}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -516,7 +641,7 @@ function pipeAsync(fn) {
 
 // Browserify compat
 if (typeof module !== "undefined") module.exports = pipeAsync;
-},{"./streams":11}],8:[function(require,module,exports){
+},{"./streams":12}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -594,7 +719,7 @@ function pipeFn(fn) {
 
 // Browserify compat
 if (typeof module !== "undefined") module.exports = pipeFn;
-},{"./streams":11}],9:[function(require,module,exports){
+},{"./streams":12}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -815,7 +940,7 @@ function pipeGen(fn) {
 
 // Browserify compat
 if (typeof module !== "undefined") module.exports = pipeGen;
-},{"./streams":11}],10:[function(require,module,exports){
+},{"./streams":12}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -873,7 +998,7 @@ function split(stream) {
 
 // Browserify compat
 if (typeof module !== "undefined") module.exports = split;
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -914,7 +1039,7 @@ var ReadableByteStream = exports.ReadableByteStream = interfaces.ReadableByteStr
     TransformStream = exports.TransformStream = interfaces.TransformStream;
 
 exports.default = interfaces;
-},{"web-streams-polyfill":"web-streams-polyfill"}],12:[function(require,module,exports){
+},{"web-streams-polyfill":"web-streams-polyfill"}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -955,4 +1080,4 @@ function zipWith(fn, arr1, arr2) {
     res.push(fn(arr1.pop(), arr2.pop()));
   }return res;
 }
-},{}]},{},[4]);
+},{}]},{},[5]);

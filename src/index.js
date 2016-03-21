@@ -1,3 +1,4 @@
+import accumulate from "./accumulate";
 import connect from "./connect";
 import chain from "./chain";
 import flatten from "./flatten";
@@ -7,6 +8,7 @@ import split from "./split";
 
 // Exports
 export {
+  accumulate,
   connect,
   chain,
   flatten,
@@ -17,6 +19,7 @@ export {
 
 // Default exports
 const fns = {
+  accumulate,
   connect,
   chain,
   flatten,

@@ -3,7 +3,11 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.split = exports.pipe = exports.merge = exports.flatten = exports.chain = exports.connect = undefined;
+exports.split = exports.pipe = exports.merge = exports.flatten = exports.chain = exports.connect = exports.accumulate = undefined;
+
+var _accumulate = require("./accumulate");
+
+var _accumulate2 = _interopRequireDefault(_accumulate);
 
 var _connect = require("./connect");
 
@@ -32,6 +36,7 @@ var _split2 = _interopRequireDefault(_split);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Exports
+exports.accumulate = _accumulate2.default;
 exports.connect = _connect2.default;
 exports.chain = _chain2.default;
 exports.flatten = _flatten2.default;
@@ -42,6 +47,7 @@ exports.split = _split2.default;
 // Default exports
 
 var fns = {
+  accumulate: _accumulate2.default,
   connect: _connect2.default,
   chain: _chain2.default,
   flatten: _flatten2.default,
