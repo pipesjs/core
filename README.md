@@ -20,6 +20,8 @@ The `core` module contains some basic utility functions to make working with `we
 
 The spec is still evolving but has reached a fairly stable stage with a [reference implementation](https://github.com/whatwg/streams/tree/master/reference-implementation) as well. The API has almost been finalized and `Stream`s are coming to the web very soon!
 
+The `core` module is designed to be extremely lightweight and barebones, tbe minified and gzipped build is just `4 kb`.
+
 At it's core, the API exposes three major components:
 
  - `ReadableStream` encapsulates a source producing values and emits them.
@@ -89,6 +91,7 @@ The library only consists of the following functions:
 
  -  [pipe](#pipe)
  -  [pipe.async](#pipeasync)
+ -  [accumulated](#accumulated)
  -  [chain](#chain)
  -  [connect](#connect)
  -  [flatten](#flatten)
@@ -217,6 +220,33 @@ let serverTalker = pipe.async( function (msg) {
 rOut = rIn.pipeThrough( new serverTalker );  // {response}, {response}, {response}
 
 ```
+
+### accumulate
+
+```javascript
+accumulate(
+  Function,     // Reducing function
+  InitValue     // (Optional) Initial value
+) -> ReadableWritable // readable-writable pair
+```
+
+`accumulate` function takes a reducer function and an optional inital value.
+
+Returns a readable, writable pair that consumes the piped stream, combining the values with the reducer and enqueues the result.
+
+```javascript
+
+let readable, accumulator, accumulated, total;
+
+  // Create streams
+  readable = createTestReadable( [1,2,3] );
+
+  // Connect the streams
+  accumulator = accumulate( (a, b) => a+b, 4 );
+  accumulated = readable.pipeThrough( new accumulator );    // 10
+
+```
+
 
 ### chain
 
