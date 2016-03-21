@@ -9,7 +9,7 @@ import {
 
 suite("accumulate");
 
-test.skip("check reducer", done => {
+test("check reducer", done => {
   let readable, writable, accumulated, total;
 
   // Create test streams
@@ -31,7 +31,7 @@ test.skip("check reducer", done => {
   });
 });
 
-test.skip("check reducer with init value", done => {
+test("check reducer with init value", done => {
   let readable, writable, accumulated, total;
 
   // Create test streams
