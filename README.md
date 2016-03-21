@@ -91,7 +91,7 @@ The library only consists of the following functions:
 
  -  [pipe](#pipe)
  -  [pipe.async](#pipeasync)
- -  [accumulated](#accumulated)
+ -  [accumulate](#accumulate)
  -  [chain](#chain)
  -  [connect](#connect)
  -  [flatten](#flatten)
