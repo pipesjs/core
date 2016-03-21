@@ -49,6 +49,8 @@
 
 <p>The spec is still evolving but has reached a fairly stable stage with a <a href="https://github.com/whatwg/streams/tree/master/reference-implementation">reference implementation</a> as well. The API has almost been finalized and <code>Stream</code>s are coming to the web very soon!</p>
 
+<p>The <code>core</code> module is designed to be extremely lightweight and barebones, tbe minified and gzipped build is just <code>4 kb</code>.</p>
+
 <p>At it's core, the API exposes three major components:</p>
 
 <ul>
@@ -121,6 +123,8 @@
 <li> <a href="#pipe">pipe</a>
 </li>
 <li> <a href="#pipeasync">pipe.async</a>
+</li>
+<li> <a href="#accumulate">accumulate</a>
 </li>
 <li> <a href="#chain">chain</a>
 </li>
@@ -250,6 +254,29 @@ rOut <span class="pl-k">=</span> <span class="pl-smi">rIn</span>.<span class="pl
   rOut;
 
 rOut <span class="pl-k">=</span> <span class="pl-smi">rIn</span>.<span class="pl-en">pipeThrough</span>( <span class="pl-k">new</span> <span class="pl-en">serverTalker</span> );  <span class="pl-c">// {response}, {response}, {response}</span>
+</pre></div>
+
+<h3>
+<a id="accumulate" class="anchor" href="#accumulate" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>accumulate</h3>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-en">accumulate</span>(
+  <span class="pl-c1">Function</span>,     <span class="pl-c">// Reducing function</span>
+  InitValue     <span class="pl-c">// (Optional) Initial value</span>
+) <span class="pl-k">-</span><span class="pl-k">&gt;</span> ReadableWritable <span class="pl-c">// readable-writable pair</span></pre></div>
+
+<p><code>accumulate</code> function takes a reducer function and an optional inital value.</p>
+
+<p>Returns a readable, writable pair that consumes the piped stream, combining the values with the reducer and enqueues the result.</p>
+
+<div class="highlight highlight-source-js"><pre>
+<span class="pl-k">let</span> readable, accumulator, accumulated, total;
+
+  <span class="pl-c">// Create streams</span>
+  readable <span class="pl-k">=</span> <span class="pl-en">createTestReadable</span>( [<span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>] );
+
+  <span class="pl-c">// Connect the streams</span>
+  accumulator <span class="pl-k">=</span> <span class="pl-en">accumulate</span>( (<span class="pl-smi">a</span>, <span class="pl-smi">b</span>) <span class="pl-k">=&gt;</span> a<span class="pl-k">+</span>b, <span class="pl-c1">4</span> );
+  accumulated <span class="pl-k">=</span> <span class="pl-smi">readable</span>.<span class="pl-en">pipeThrough</span>( <span class="pl-k">new</span> <span class="pl-en">accumulator</span> );    <span class="pl-c">// 10</span>
 </pre></div>
 
 <h3>
