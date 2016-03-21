@@ -20,7 +20,7 @@ The `core` module contains some basic utility functions to make working with `we
 
 The spec is still evolving but has reached a fairly stable stage with a [reference implementation](https://github.com/whatwg/streams/tree/master/reference-implementation) as well. The API has almost been finalized and `Stream`s are coming to the web very soon!
 
-The `core` module is designed to be extremely lightweight and barebones, tbe minified and gzipped build is just `4 kb`.
+The `core` module is designed to be extremely lightweight and barebones, the minified and gzipped build is just `4 kb`.
 
 At it's core, the API exposes three major components:
 
@@ -379,3 +379,9 @@ let readable = createReadable([1,2,3]),
 r1.pipeTo( w1 );   // 1, 2, 3
 r2.pipeTo( w2 );   // 1, 2, 3
 ```
+
+## Thanks
+
+The domain is kindly hosted by:
+
+![JS.ORG | JavaScript Community](https://logo.js.org/dark_tiny.png "JS.ORG | JavaScript Community")
