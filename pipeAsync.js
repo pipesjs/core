@@ -103,7 +103,10 @@ function pipeAsync(fn) {
     return TransformBlueprint;
   }(_streams.TransformStream);
 
-  return TransformBlueprint;
+  // Return Transform blueprint if not instance
+
+
+  if (this instanceof pipeAsync) return new TransformBlueprint();else return TransformBlueprint;
 }
 
 // Browserify compat

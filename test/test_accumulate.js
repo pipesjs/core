@@ -9,6 +9,14 @@ import {
 
 suite("accumulate");
 
+test("check instantiation", () => {
+  let accumulated = new accumulate( (a, b) => a+b );
+
+  // Check instantiation
+  assert( accumulated.readable );
+  assert( accumulated.writable );
+});
+
 test("check reducer", done => {
   let readable, writable, accumulated, total;
 

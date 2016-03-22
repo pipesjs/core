@@ -108,8 +108,12 @@ export default function accumulate(reducer, init) {
     }
   }
 
-  // Return ReadableWritable blueprint
-  return ReadableWritableBlueprint;
+  // Return ReadableWritable blueprint if not instance
+  if ( this instanceof accumulate )
+    return new ReadableWritableBlueprint;
+
+  else
+    return ReadableWritableBlueprint;
 
 }
 

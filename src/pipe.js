@@ -12,15 +12,24 @@ import pipeFn from "./pipeFn";
 import pipeGen from "./pipeGen";
 
 export default function pipe ( fn, opts ) {
+  let blueprint;
+
   // Route to appropriate function
   if ( isGeneratorFn( fn ))
-    return pipeGen( fn, opts );
+    blueprint = pipeGen( fn, opts );
 
   else if ( isFunction( fn ))
-    return pipeFn( fn, opts );
+    blueprint = pipeFn( fn, opts );
 
   else
     throw new Error("Invalid argument");
+
+  // Return Transform blueprint if not instance
+  if ( this instanceof pipe )
+    return new blueprint;
+
+  else
+    return blueprint;
 }
 
 // Add async support

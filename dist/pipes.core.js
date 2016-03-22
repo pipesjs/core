@@ -109,10 +109,10 @@ function accumulate(reducer, init) {
     });
   };
 
-  // Return ReadableWritable blueprint
+  // Return ReadableWritable blueprint if not instance
 
 
-  return ReadableWritableBlueprint;
+  if (this instanceof accumulate) return new ReadableWritableBlueprint();else return ReadableWritableBlueprint;
 }
 
 // Browserify compat
@@ -521,8 +521,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 //
 
 function pipe(fn, opts) {
+  var blueprint = void 0;
+
   // Route to appropriate function
-  if ((0, _utils.isGeneratorFn)(fn)) return (0, _pipeGen2.default)(fn, opts);else if ((0, _utils.isFunction)(fn)) return (0, _pipeFn2.default)(fn, opts);else throw new Error("Invalid argument");
+  if ((0, _utils.isGeneratorFn)(fn)) blueprint = (0, _pipeGen2.default)(fn, opts);else if ((0, _utils.isFunction)(fn)) blueprint = (0, _pipeFn2.default)(fn, opts);else throw new Error("Invalid argument");
+
+  // Return Transform blueprint if not instance
+  if (this instanceof pipe) return new blueprint();else return blueprint;
 }
 
 // Add async support
@@ -636,7 +641,10 @@ function pipeAsync(fn) {
     return TransformBlueprint;
   }(_streams.TransformStream);
 
-  return TransformBlueprint;
+  // Return Transform blueprint if not instance
+
+
+  if (this instanceof pipeAsync) return new TransformBlueprint();else return TransformBlueprint;
 }
 
 // Browserify compat

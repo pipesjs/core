@@ -108,10 +108,10 @@ function accumulate(reducer, init) {
     });
   };
 
-  // Return ReadableWritable blueprint
+  // Return ReadableWritable blueprint if not instance
 
 
-  return ReadableWritableBlueprint;
+  if (this instanceof accumulate) return new ReadableWritableBlueprint();else return ReadableWritableBlueprint;
 }
 
 // Browserify compat

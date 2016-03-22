@@ -83,7 +83,13 @@ export default function pipeAsync ( fn, {
     }
   }
 
-  return TransformBlueprint;
+  // Return Transform blueprint if not instance
+  if ( this instanceof pipeAsync )
+    return new TransformBlueprint;
+
+  else
+    return TransformBlueprint;
+
 }
 
 // Browserify compat

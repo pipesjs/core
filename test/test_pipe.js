@@ -12,6 +12,23 @@ import {
 
 suite("pipe");
 
+test("check instantiation", () => {
+  let
+    transform1 = new pipe( k => k ),
+    transform2 = new pipe.async( async k => k ),
+    transform3 = new pipe( function* (k) { return k } );
+
+  // Check instantiation
+  assert( transform1.readable );
+  assert( transform1.writable );
+
+  assert( transform2.readable );
+  assert( transform2.writable );
+
+  assert( transform3.readable );
+  assert( transform3.writable );
+});
+
 test("check simple function", done => {
   let readable, writable, transform;
 
