@@ -11,8 +11,8 @@ function connect(origin) {
   // Check origin
   if (!origin) throw new Error("No streams passed");
 
-  var sink = undefined,
-      end = undefined;
+  var sink = void 0,
+      end = void 0;
 
   // Get the last stream
 

@@ -10,11 +10,11 @@ var _streams = require("./streams");
 
 var _utils = require("./utils");
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } // accumulate :: Function -> InitValue -> { readable, writable }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } // accumulate :: Function -> InitValue -> ReadableWritableBlueprint
 // accumulate function takes a reducer function,
 // and an optional inital value.
 //
-// Returns a readable, writable pair that consumes piped
+// Returns a ReadableWritableBlueprint that consumes piped
 // stream, combining the values with the reducer
 // and enqueues the result.
 //
@@ -35,17 +35,17 @@ function accumulate(reducer, init) {
   // check if reducer is a function
   if (!(0, _utils.isFunction)(reducer)) throw new Error(compatibilityError);
 
-  var ReadableWritable = function ReadableWritable() {
-    _classCallCheck(this, ReadableWritable);
+  var ReadableWritableBlueprint = function ReadableWritableBlueprint() {
+    _classCallCheck(this, ReadableWritableBlueprint);
 
     // Init
     var result = init,
-        readable = undefined,
-        writable = undefined,
-        done = undefined,
-        resolved = undefined,
-        rejected = undefined,
-        cancelled = undefined;
+        readable = void 0,
+        writable = void 0,
+        done = void 0,
+        resolved = void 0,
+        rejected = void 0,
+        cancelled = void 0;
 
     // Create done promise
     done = new Promise(function (resolve, reject) {
@@ -112,7 +112,7 @@ function accumulate(reducer, init) {
   // Return ReadableWritable blueprint
 
 
-  return ReadableWritable;
+  return ReadableWritableBlueprint;
 }
 
 // Browserify compat
@@ -184,8 +184,8 @@ function connect(origin) {
   // Check origin
   if (!origin) throw new Error("No streams passed");
 
-  var sink = undefined,
-      end = undefined;
+  var sink = void 0,
+      end = void 0;
 
   // Get the last stream
 
@@ -268,7 +268,7 @@ function flatten() {
     streams[_key] = arguments[_key];
   }
 
-  var flattenedStream = undefined,
+  var flattenedStream = void 0,
       writers = [];
 
   return flattenedStream = new _streams.ReadableStream({
@@ -283,7 +283,7 @@ function flatten() {
       var connect = function connect(r, w) {
         return r.pipeTo(w);
       },
-          pipedAll = undefined;
+          pipedAll = void 0;
 
       try {
         pipedAll = (0, _utils.zipWith)(connect, streams, writers);
@@ -431,10 +431,10 @@ function merge() {
     streams[_key] = arguments[_key];
   }
 
-  var readers = undefined,
-      chunkWaiters = undefined,
-      mergedStream = undefined,
-      merger = undefined;
+  var readers = void 0,
+      chunkWaiters = void 0,
+      mergedStream = void 0,
+      merger = void 0;
 
   // Get readers
   try {
@@ -455,8 +455,8 @@ function merge() {
     promises = readers.map(function (r) {
       return r.read();
     }),
-        merged = undefined,
-        push = undefined;
+        merged = void 0,
+        push = void 0;
 
     // Read values and push them onto the stream
     push = function push(_ref) {
@@ -753,7 +753,7 @@ var GenObjManager = function () {
   function GenObjManager(gen, enqueue, readable) {
     _classCallCheck(this, GenObjManager);
 
-    var done = undefined,
+    var done = void 0,
         condEnqueue = function condEnqueue(v) {
       if (v !== void 0) enqueue(v);
     },
@@ -873,7 +873,7 @@ function pipeGen(fn) {
 
 
   // Prepare transformer
-  var genManager = undefined,
+  var genManager = void 0,
       transformer = {
     transform: function transform(chunk, enqueue, done) {
       // Create generator manager
@@ -961,9 +961,9 @@ function split(stream) {
   if (!stream.tee) throw new Error("Only readable streams can be split");
 
   // Decls
-  var result = undefined,
-      cancelFns = undefined,
-      cancelAll = undefined;
+  var result = void 0,
+      cancelFns = void 0,
+      cancelAll = void 0;
 
   // Generate parts
   result = [stream];
@@ -1006,7 +1006,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 // Access stream interface
 
-var interfaces = undefined,
+var interfaces = void 0,
     global = global || {};
 
 if (typeof window !== 'undefined') global = window;

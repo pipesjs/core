@@ -27,8 +27,8 @@ function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); } //
 //
 
 function zip() {
-  var applier = undefined,
-      merged = undefined;
+  var applier = void 0,
+      merged = void 0;
 
   // Merge streams
   merged = _merge2.default.apply(undefined, arguments);

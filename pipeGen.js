@@ -31,7 +31,7 @@ var GenObjManager = function () {
   function GenObjManager(gen, enqueue, readable) {
     _classCallCheck(this, GenObjManager);
 
-    var done = undefined,
+    var done = void 0,
         condEnqueue = function condEnqueue(v) {
       if (v !== void 0) enqueue(v);
     },
@@ -151,7 +151,7 @@ function pipeGen(fn) {
 
 
   // Prepare transformer
-  var genManager = undefined,
+  var genManager = void 0,
       transformer = {
     transform: function transform(chunk, enqueue, done) {
       // Create generator manager

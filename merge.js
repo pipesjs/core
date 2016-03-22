@@ -58,10 +58,10 @@ function merge() {
     streams[_key] = arguments[_key];
   }
 
-  var readers = undefined,
-      chunkWaiters = undefined,
-      mergedStream = undefined,
-      merger = undefined;
+  var readers = void 0,
+      chunkWaiters = void 0,
+      mergedStream = void 0,
+      merger = void 0;
 
   // Get readers
   try {
@@ -82,8 +82,8 @@ function merge() {
     promises = readers.map(function (r) {
       return r.read();
     }),
-        merged = undefined,
-        push = undefined;
+        merged = void 0,
+        push = void 0;
 
     // Read values and push them onto the stream
     push = function push(_ref) {

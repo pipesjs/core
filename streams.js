@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 // Access stream interface
 
-var interfaces = undefined,
+var interfaces = void 0,
     global = global || {};
 
 if (typeof window !== 'undefined') global = window;

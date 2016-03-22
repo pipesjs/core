@@ -20,7 +20,7 @@ function flatten() {
     streams[_key] = arguments[_key];
   }
 
-  var flattenedStream = undefined,
+  var flattenedStream = void 0,
       writers = [];
 
   return flattenedStream = new _streams.ReadableStream({
@@ -35,7 +35,7 @@ function flatten() {
       var connect = function connect(r, w) {
         return r.pipeTo(w);
       },
-          pipedAll = undefined;
+          pipedAll = void 0;
 
       try {
         pipedAll = (0, _utils.zipWith)(connect, streams, writers);

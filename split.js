@@ -18,9 +18,9 @@ function split(stream) {
   if (!stream.tee) throw new Error("Only readable streams can be split");
 
   // Decls
-  var result = undefined,
-      cancelFns = undefined,
-      cancelAll = undefined;
+  var result = void 0,
+      cancelFns = void 0,
+      cancelAll = void 0;
 
   // Generate parts
   result = [stream];

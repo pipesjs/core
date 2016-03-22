@@ -1,8 +1,8 @@
-// accumulate :: Function -> InitValue -> { readable, writable }
+// accumulate :: Function -> InitValue -> ReadableWritableBlueprint
 // accumulate function takes a reducer function,
 // and an optional inital value.
 //
-// Returns a readable, writable pair that consumes piped
+// Returns a ReadableWritableBlueprint that consumes piped
 // stream, combining the values with the reducer
 // and enqueues the result.
 //
@@ -30,7 +30,7 @@ export default function accumulate(reducer, init) {
   if ( !isFunction( reducer ))
     throw new Error( compatibilityError );
 
-  class ReadableWritable {
+  class ReadableWritableBlueprint {
     constructor() {
 
       // Init
@@ -109,7 +109,7 @@ export default function accumulate(reducer, init) {
   }
 
   // Return ReadableWritable blueprint
-  return ReadableWritable;
+  return ReadableWritableBlueprint;
 
 }
 

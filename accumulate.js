@@ -9,11 +9,11 @@ var _streams = require("./streams");
 
 var _utils = require("./utils");
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } // accumulate :: Function -> InitValue -> { readable, writable }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } // accumulate :: Function -> InitValue -> ReadableWritableBlueprint
 // accumulate function takes a reducer function,
 // and an optional inital value.
 //
-// Returns a readable, writable pair that consumes piped
+// Returns a ReadableWritableBlueprint that consumes piped
 // stream, combining the values with the reducer
 // and enqueues the result.
 //
@@ -34,17 +34,17 @@ function accumulate(reducer, init) {
   // check if reducer is a function
   if (!(0, _utils.isFunction)(reducer)) throw new Error(compatibilityError);
 
-  var ReadableWritable = function ReadableWritable() {
-    _classCallCheck(this, ReadableWritable);
+  var ReadableWritableBlueprint = function ReadableWritableBlueprint() {
+    _classCallCheck(this, ReadableWritableBlueprint);
 
     // Init
     var result = init,
-        readable = undefined,
-        writable = undefined,
-        done = undefined,
-        resolved = undefined,
-        rejected = undefined,
-        cancelled = undefined;
+        readable = void 0,
+        writable = void 0,
+        done = void 0,
+        resolved = void 0,
+        rejected = void 0,
+        cancelled = void 0;
 
     // Create done promise
     done = new Promise(function (resolve, reject) {
@@ -111,7 +111,7 @@ function accumulate(reducer, init) {
   // Return ReadableWritable blueprint
 
 
-  return ReadableWritable;
+  return ReadableWritableBlueprint;
 }
 
 // Browserify compat

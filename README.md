@@ -227,12 +227,12 @@ rOut = rIn.pipeThrough( new serverTalker );  // {response}, {response}, {respons
 accumulate(
   Function,     // Reducing function
   InitValue     // (Optional) Initial value
-) -> ReadableWritable // readable-writable pair
+) -> ReadableWritableBlueprint // readable-writable pair
 ```
 
 `accumulate` function takes a reducer function and an optional inital value.
 
-Returns a readable, writable pair that consumes the piped stream, combining the values with the reducer and enqueues the result.
+Returns a ReadableWritableBlueprint that consumes the piped stream, combining the values with the reducer and enqueues the result.
 
 ```javascript
 
