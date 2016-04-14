@@ -30,11 +30,14 @@ class GenObjManager {
     });
   }
 
+  // Access to readable stream controller
+  get readableController () { return this.readable._readableStreamController; }
+
   // Make manager a thenable
   get then () { return this.promise.then.bind(this.promise); }
 
   // Get backpressure signals
-  get ready () { return this.readable._controller.desiredSize >= 0 }
+  get ready () { return this.readableController.desiredSize >= 0 }
 
   // Kick start the read loop
   start () {
@@ -139,15 +142,17 @@ export default function pipeGen ( fn, {
   class TransformBlueprint extends TransformStream {
     constructor () {
       // Make stream
-      let stream = super( transformer );
+      let
+        stream = super( transformer ),
+        { _underlyingSource } = stream.readable._readableStreamController;
 
       // Bind transform function to stream
       transformer.transform = transformer.transform.bind(stream);
 
       // Super hacky because TransformStream doesn't allow an easy way to do this
       // Wrap pull so that it can signal generator to resume
-      let _pull = stream.readable._underlyingSource.pull;
-      stream.readable._underlyingSource.pull = c => {
+      let _pull = _underlyingSource.pull;
+      _underlyingSource.pull = c => {
 
         // Resume generator manager
         genManager && genManager.start();

@@ -777,7 +777,7 @@ var GenObjManager = function () {
     });
   }
 
-  // Make manager a thenable
+  // Access to readable stream controller
 
 
   _createClass(GenObjManager, [{
@@ -853,6 +853,14 @@ var GenObjManager = function () {
       }
     }
   }, {
+    key: "readableController",
+    get: function get() {
+      return this.readable._readableStreamController;
+    }
+
+    // Make manager a thenable
+
+  }, {
     key: "then",
     get: function get() {
       return this.promise.then.bind(this.promise);
@@ -863,7 +871,7 @@ var GenObjManager = function () {
   }, {
     key: "ready",
     get: function get() {
-      return this.readable._controller.desiredSize >= 0;
+      return this.readableController.desiredSize >= 0;
     }
   }]);
 
@@ -918,15 +926,18 @@ function pipeGen(fn) {
       _classCallCheck(this, TransformBlueprint);
 
       // Make stream
+
       var stream = (_this = _possibleConstructorReturn(this, Object.getPrototypeOf(TransformBlueprint).call(this, transformer)), _this);
+      var _underlyingSource = stream.readable._readableStreamController._underlyingSource;
 
       // Bind transform function to stream
+
       transformer.transform = transformer.transform.bind(stream);
 
       // Super hacky because TransformStream doesn't allow an easy way to do this
       // Wrap pull so that it can signal generator to resume
-      var _pull = stream.readable._underlyingSource.pull;
-      stream.readable._underlyingSource.pull = function (c) {
+      var _pull = _underlyingSource.pull;
+      _underlyingSource.pull = function (c) {
 
         // Resume generator manager
         genManager && genManager.start();
