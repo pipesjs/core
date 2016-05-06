@@ -597,7 +597,7 @@ function pipeAsync(fn) {
       // Remove itself from the _unfulfilledFutures list
       .then(function () {
         return self._unfulfilledFutures.splice(findex, 1);
-      }).done(done);
+      }).then(done);
 
       return future;
     },
@@ -610,7 +610,7 @@ function pipeAsync(fn) {
       // Check if anything is left
       Promise.all(self._unfulfilledFutures).then(function (vs) {
         return vs.map(condEnqueue);
-      }).done(close);
+      }).then(close);
     },
 
 
