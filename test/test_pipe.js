@@ -47,18 +47,22 @@ test("check simple function", done => {
 });
 
 test("check async function", done => {
-  let readable, writable, transform;
+  let readable, writable, transform,
+    called = 0;
 
   // Create test streams
   readable = createTestReadable( [1,2,3] );
-  writable = createTestWritable( assert );
+  writable = createTestWritable( () => called++ );
   transform = pipe.async( async function (k) {
     await till( 200 );
     return k;
   });
 
   // End case
-  broker.on(writable.signals.close, done);
+  broker.on(writable.signals.close, () => {
+    assert( called == 3 );
+    done();
+  });
 
   // Connect the streams
   assert.doesNotThrow( () => {
@@ -67,18 +71,22 @@ test("check async function", done => {
 });
 
 test("check async promise function", done => {
-  let readable, writable, transform;
+  let readable, writable, transform,
+    called = 0;
 
   // Create test streams
   readable = createTestReadable( [1,2,3] );
-  writable = createTestWritable( assert );
+  writable = createTestWritable( () => called++ );
   transform = pipe.async( function (k) {
     // Return promie that resolves to k
     return till( 200, k );
   });
 
   // End case
-  broker.on(writable.signals.close, done);
+  broker.on(writable.signals.close, () => {
+    assert( called == 3 );
+    done();
+  });
 
   // Connect the streams
   assert.doesNotThrow( () => {

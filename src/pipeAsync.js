@@ -46,7 +46,7 @@ export default function pipeAsync ( fn, {
 
         // Remove itself from the _unfulfilledFutures list
         .then( () => self._unfulfilledFutures.splice( findex, 1 ) )
-        .done( done );
+        .then( done );
 
       return future;
     },
@@ -61,7 +61,7 @@ export default function pipeAsync ( fn, {
       // Check if anything is left
       Promise.all( self._unfulfilledFutures )
         .then( vs => vs.map( condEnqueue ))
-        .done( close );
+        .then( close );
     },
 
     // if passed
