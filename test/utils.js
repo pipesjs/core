@@ -20,13 +20,13 @@ export function createTestReadable (data) {
   let stream = new ReadableStream({
     start (c) {
       broker.emit(signals.init);
-      c.enqueue(data.pop());
+      c.enqueue(data.shift());
     },
     pull (c) {
       if ( !data.length )
         c.close();
 
-      c.enqueue(data.pop());
+      c.enqueue(data.shift());
     },
     cancel () {
       broker.emit(signals.cancel);
