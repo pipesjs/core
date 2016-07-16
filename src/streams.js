@@ -9,7 +9,6 @@ if ( typeof window !== 'undefined' )
 if ( !!global.ReadableStream ) {
 
   interfaces = {
-    ReadableByteStream:        global.ReadableByteStream,
     ReadableStream:            global.ReadableStream,
     WritableStream:            global.WritableStream,
     ByteLengthQueuingStrategy: global.ByteLengthQueuingStrategy,
@@ -20,7 +19,8 @@ if ( !!global.ReadableStream ) {
 } else {
 
   try {
-    interfaces = require("web-streams-polyfill")["default"];
+    interfaces = require("web-streams-polyfill");
+    console.log( JSON.stringify(interfaces,null,4));
 
   } catch (e) {
 
@@ -29,7 +29,6 @@ if ( !!global.ReadableStream ) {
 }
 
 export const
-  ReadableByteStream = interfaces.ReadableByteStream,
   ReadableStream = interfaces.ReadableStream,
   WritableStream = interfaces.WritableStream,
   ByteLengthQueuingStrategy = interfaces.ByteLengthQueuingStrategy,

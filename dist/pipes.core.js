@@ -1033,7 +1033,6 @@ if (typeof window !== 'undefined') global = window;
 if (!!global.ReadableStream) {
 
   interfaces = {
-    ReadableByteStream: global.ReadableByteStream,
     ReadableStream: global.ReadableStream,
     WritableStream: global.WritableStream,
     ByteLengthQueuingStrategy: global.ByteLengthQueuingStrategy,
@@ -1043,15 +1042,15 @@ if (!!global.ReadableStream) {
 } else {
 
   try {
-    interfaces = require("web-streams-polyfill")["default"];
+    interfaces = require("web-streams-polyfill");
+    console.log(JSON.stringify(interfaces, null, 4));
   } catch (e) {
 
     throw new Error("No Stream implementation found");
   }
 }
 
-var ReadableByteStream = exports.ReadableByteStream = interfaces.ReadableByteStream,
-    ReadableStream = exports.ReadableStream = interfaces.ReadableStream,
+var ReadableStream = exports.ReadableStream = interfaces.ReadableStream,
     WritableStream = exports.WritableStream = interfaces.WritableStream,
     ByteLengthQueuingStrategy = exports.ByteLengthQueuingStrategy = interfaces.ByteLengthQueuingStrategy,
     CountQueuingStrategy = exports.CountQueuingStrategy = interfaces.CountQueuingStrategy,
