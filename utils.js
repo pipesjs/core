@@ -12,7 +12,7 @@ var isTransform = exports.isTransform = function isTransform(s) {
   return s && s.pipeThrough;
 },
     isWritable = exports.isWritable = function isWritable(s) {
-  return s && s.write;
+  return s && s.getWriter;
 },
 
 

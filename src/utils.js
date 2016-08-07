@@ -2,7 +2,7 @@
 export const
   isTransform = s => s && s.writable && s.readable,
   isReadable = s => s && s.pipeThrough,
-  isWritable = s => s && s.write,
+  isWritable = s => s && s.getWriter,
 
   // Inspired by code from @tj/co library
   isFunction = f => f && typeof f === "function",
