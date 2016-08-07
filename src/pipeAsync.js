@@ -73,11 +73,13 @@ export default function pipeAsync ( fn, {
   class TransformBlueprint extends TransformStream {
     constructor () {
       // Make stream
-      let stream = super( transformer );
+      let
+        stream = super( transformer ),
+        writer = stream.writable.getWriter();
 
       // If init, push chunk
       if ( init !== void 0 )
-        stream.writable.write( init );
+        writer.write( init );
 
       return stream;
     }

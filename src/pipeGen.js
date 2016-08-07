@@ -144,6 +144,7 @@ export default function pipeGen ( fn, {
       // Make stream
       let
         stream = super( transformer ),
+        writer = stream.writable.getWriter(),
         { _underlyingSource } = stream.readable._readableStreamController;
 
       // Bind transform function to stream
@@ -162,7 +163,7 @@ export default function pipeGen ( fn, {
 
       // If init, push chunk
       if ( init !== void 0 )
-        stream.writable.write( init );
+        writer.write( init );
 
       return stream;
     }
