@@ -17,13 +17,11 @@ export default function pipeFn ( fn, {
   // Prepare transformer
   let transformer = {
     // Run function and enqueue result
-    transform ( chunk, enqueue, done ) {
-      let condEnqueue = v => {
-          if ( v !== void 0 )
-            enqueue( v );
-        };
+    transform ( chunk, done, enqueue ) {
+      let v = fn( chunk );
 
-      condEnqueue( fn ( chunk ));
+      if ( v !== void 0 )
+        enqueue( v );
 
       return done();
     },
@@ -39,11 +37,16 @@ export default function pipeFn ( fn, {
       // Make stream
       let
         stream = super( transformer ),
-        writer = stream.writable.getWriter();
+        writer;
 
       // If init, push chunk
-      if ( init !== void 0 )
+      if ( init !== void 0 ) {
+        writer = stream.writable.getWriter();
         writer.write( init );
+
+        // Release lock so other writers can start writing
+        writer.releaseLock();
+      }
 
       return stream;
     }

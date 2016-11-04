@@ -26,7 +26,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 // Manages generator object and consumes it
 // while taking backpressure into account
-
 var GenObjManager = function () {
   function GenObjManager(gen, enqueue, readable) {
     _classCallCheck(this, GenObjManager);
@@ -103,7 +102,6 @@ var GenObjManager = function () {
     key: "tick",
     value: function tick(msg) {
       // Get next value
-
       var _gen$next = this.gen.next(msg);
 
       var value = _gen$next.value;
@@ -151,9 +149,7 @@ var GenObjManager = function () {
 function pipeGen(fn) {
   var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-  var
-  // opts
-  init = _ref.init;
+  var init = _ref.init;
   var readableStrategy = _ref.readableStrategy;
   var writableStrategy = _ref.writableStrategy;
 
@@ -161,7 +157,7 @@ function pipeGen(fn) {
   // Prepare transformer
   var genManager = void 0,
       transformer = {
-    transform: function transform(chunk, enqueue, done) {
+    transform: function transform(chunk, done, enqueue) {
       // Create generator manager
       genManager = new GenObjManager(fn(chunk), enqueue, this.readable);
 
@@ -196,12 +192,11 @@ function pipeGen(fn) {
       _classCallCheck(this, TransformBlueprint);
 
       // Make stream
-
       var stream = (_this = _possibleConstructorReturn(this, Object.getPrototypeOf(TransformBlueprint).call(this, transformer)), _this);
       var _underlyingSource = stream.readable._readableStreamController._underlyingSource;
+      var writer = void 0;
 
       // Bind transform function to stream
-
       transformer.transform = transformer.transform.bind(stream);
 
       // Super hacky because TransformStream doesn't allow an easy way to do this
@@ -216,7 +211,13 @@ function pipeGen(fn) {
       };
 
       // If init, push chunk
-      if (init !== void 0) stream.writable.write(init);
+      if (init !== void 0) {
+        writer = stream.writable.getWriter();
+        writer.write(init);
+
+        // Release lock so other writers can start writing
+        writer.releaseLock();
+      }
 
       return _ret = stream, _possibleConstructorReturn(_this, _ret);
     }

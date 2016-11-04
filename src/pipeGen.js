@@ -34,7 +34,7 @@ class GenObjManager {
   get readableController () { return this.readable._readableStreamController; }
 
   // Make manager a thenable
-  get then () { return this.promise.then.bind(this.promise); }
+  get then () { return this.promise.then.bind( this.promise ); }
 
   // Get backpressure signals
   get ready () { return this.readableController.desiredSize >= 0 }
@@ -57,7 +57,7 @@ class GenObjManager {
     this.pause();
 
     // Close generator
-    this.gen.return();
+    this.gen && this.gen.return();
     this.gen = null;
 
     // Call done
@@ -112,31 +112,34 @@ export default function pipeGen ( fn, {
   let
     genManager,
     transformer = {
-    transform ( chunk, enqueue, done ) {
-      // Create generator manager
-      genManager = new GenObjManager(
-        fn( chunk ),
-        enqueue,
-        this.readable
-      );
+      transform ( chunk, done, enqueue ) {
+        // Create generator manager
+        let gen = fn( chunk );
 
-      // Set up closing
-      genManager.then( () => done() );
+        genManager = new GenObjManager(
+          gen,
+          enqueue,
+          this.readable
+        );
 
-      // Start consuming
-      genManager.start();
-    },
+        // Set up closing
+        genManager.then( () => done() );
 
-    flush ( enqueue, close ) {
-      // Flush generator
-      genManager && genManager.flush();
-      close();
-    },
+        // Start consuming
+        genManager.start();
+      },
 
-    // if passed
-    readableStrategy,
-    writableStrategy
-  };
+      flush ( enqueue, close ) {
+        // Flush generator
+        genManager && genManager.flush();
+        close();
+      },
+
+      // if passed
+      readableStrategy,
+      writableStrategy
+    };
+
 
   // Wrap in blueprint class
   class TransformBlueprint extends TransformStream {
@@ -144,11 +147,11 @@ export default function pipeGen ( fn, {
       // Make stream
       let
         stream = super( transformer ),
-        writer = stream.writable.getWriter(),
-        { _underlyingSource } = stream.readable._readableStreamController;
+        { _underlyingSource } = stream.readable._readableStreamController,
+        writer;
 
       // Bind transform function to stream
-      transformer.transform = transformer.transform.bind(stream);
+      transformer.transform = transformer.transform.bind( stream );
 
       // Super hacky because TransformStream doesn't allow an easy way to do this
       // Wrap pull so that it can signal generator to resume
@@ -161,9 +164,15 @@ export default function pipeGen ( fn, {
         return _pull(c);
       }
 
+
       // If init, push chunk
-      if ( init !== void 0 )
+      if ( init !== void 0 ) {
+        writer = stream.writable.getWriter();
         writer.write( init );
+
+        // Release lock so other writers can start writing
+        writer.releaseLock();
+      }
 
       return stream;
     }

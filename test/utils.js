@@ -64,9 +64,9 @@ export function createTestWritable (fn) {
 
 export function createTestTransform () {
   return new TransformStream({
-    transform (chunk, enqueue, done) {
+    transform (chunk, done, enqueue) {
       enqueue( chunk );
-      return done();
+      done();
     }
   });
 }

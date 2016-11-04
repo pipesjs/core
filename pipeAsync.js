@@ -22,9 +22,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function pipeAsync(fn) {
   var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-  var
-  // opts
-  init = _ref.init;
+  var init = _ref.init;
   var readableStrategy = _ref.readableStrategy;
   var writableStrategy = _ref.writableStrategy;
 
@@ -35,7 +33,7 @@ function pipeAsync(fn) {
     _unfulfilledFutures: [],
 
     // Run function and enqueue result
-    transform: function transform(chunk, enqueue, done) {
+    transform: function transform(chunk, done, enqueue) {
       // Run async fn
       var self = transformer,
           future = fn(chunk),
@@ -92,10 +90,17 @@ function pipeAsync(fn) {
       _classCallCheck(this, TransformBlueprint);
 
       // Make stream
-      var stream = (_this = _possibleConstructorReturn(this, Object.getPrototypeOf(TransformBlueprint).call(this, transformer)), _this);
+      var stream = (_this = _possibleConstructorReturn(this, Object.getPrototypeOf(TransformBlueprint).call(this, transformer)), _this),
+          writer = void 0;
 
       // If init, push chunk
-      if (init !== void 0) stream.writable.write(init);
+      if (init !== void 0) {
+        writer = stream.writable.getWriter();
+        writer.write(init);
+
+        // Release lock so other writers can start writing
+        writer.releaseLock();
+      }
 
       return _ret = stream, _possibleConstructorReturn(_this, _ret);
     }

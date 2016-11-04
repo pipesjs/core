@@ -21,7 +21,7 @@ export default function pipeAsync ( fn, {
     _unfulfilledFutures: [],
 
     // Run function and enqueue result
-    transform ( chunk, enqueue, done ) {
+    transform ( chunk, done, enqueue ) {
       // Run async fn
       let
         self = transformer,
@@ -75,11 +75,17 @@ export default function pipeAsync ( fn, {
       // Make stream
       let
         stream = super( transformer ),
-        writer = stream.writable.getWriter();
+        writer;
 
       // If init, push chunk
-      if ( init !== void 0 )
+      if ( init !== void 0 ) {
+        writer = stream.writable.getWriter();
         writer.write( init );
+
+        // Release lock so other writers can start writing
+        writer.releaseLock();
+      }
+
 
       return stream;
     }
