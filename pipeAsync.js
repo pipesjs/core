@@ -31,12 +31,12 @@ function pipeAsync(fn) {
     _unfulfilledFutures: [],
 
     // Run function and enqueue result
-    transform: function transform(chunk, done, enqueue) {
+    transform: function transform(chunk, controller) {
       // Run async fn
       var self = transformer,
           future = fn(chunk),
           condEnqueue = function condEnqueue(v) {
-        if (v !== void 0) enqueue(v);
+        if (v !== void 0) controller.enqueue(v);
       },
 
 
@@ -55,20 +55,20 @@ function pipeAsync(fn) {
       // Remove itself from the _unfulfilledFutures list
       .then(function () {
         return self._unfulfilledFutures.splice(findex, 1);
-      }).then(done);
+      });
 
       return future;
     },
-    flush: function flush(enqueue, close) {
+    flush: function flush(controller) {
       var self = transformer,
           condEnqueue = function condEnqueue(v) {
-        if (v !== void 0) enqueue(v);
+        if (v !== void 0) controller.enqueue(v);
       };
 
       // Check if anything is left
       Promise.all(self._unfulfilledFutures).then(function (vs) {
         return vs.map(condEnqueue);
-      }).then(close);
+      });
     },
 
 

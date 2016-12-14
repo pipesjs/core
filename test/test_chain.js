@@ -22,15 +22,13 @@ test("check chaining", done => {
   broker.on(writable.signals.close, done);
 
   // Connect the streams
-  assert.doesNotThrow( () => {
-    testChain = chain(
-      new transform,
-      new transform,
-      new transform
-    );
+  testChain = chain(
+    new transform,
+    new transform,
+    new transform
+  );
 
-    connect( readable, testChain, writable );
-  });
+  return connect( readable, testChain, writable );
 });
 
 

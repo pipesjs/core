@@ -17,13 +17,11 @@ export default function pipeFn ( fn, {
   // Prepare transformer
   let transformer = {
     // Run function and enqueue result
-    transform ( chunk, done, enqueue ) {
+    transform ( chunk, controller ) {
       let v = fn( chunk );
 
       if ( v !== void 0 )
-        enqueue( v );
-
-      return done();
+        controller.enqueue( v );
     },
 
     // if passed

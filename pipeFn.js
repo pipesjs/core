@@ -27,12 +27,10 @@ function pipeFn(fn) {
   // Prepare transformer
   var transformer = {
     // Run function and enqueue result
-    transform: function transform(chunk, done, enqueue) {
+    transform: function transform(chunk, controller) {
       var v = fn(chunk);
 
-      if (v !== void 0) enqueue(v);
-
-      return done();
+      if (v !== void 0) controller.enqueue(v);
     },
 
 

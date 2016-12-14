@@ -19,14 +19,14 @@ test("check instantiation", () => {
     transform3 = new pipe( function* (k) { return k } );
 
   // Check instantiation
-  assert( transform1.readable );
-  assert( transform1.writable );
+  assert( transform1.readable &&
+    transform1.writable );
 
-  assert( transform2.readable );
-  assert( transform2.writable );
+  assert( transform2.readable &&
+    transform2.writable );
 
-  assert( transform3.readable );
-  assert( transform3.writable );
+  assert( transform3.readable &&
+    transform3.writable );
 });
 
 test("check simple function", done => {
@@ -94,7 +94,7 @@ test("check async promise function", done => {
   });
 });
 
-test.only("check gen function", done => {
+test.skip("check gen function", done => {
   let readable, writable, transform, counter = 0;
 
   // Create test streams
@@ -120,7 +120,7 @@ test.only("check gen function", done => {
   });
 });
 
-test.only("check infinite gen function", done => {
+test.skip("check infinite gen function", done => {
   let writable, transform, counter = 0;
 
   // Create test streams
