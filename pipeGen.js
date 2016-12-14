@@ -26,7 +26,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 // Manages generator object and consumes it
 // while taking backpressure into account
-
 var GenObjManager = function () {
   function GenObjManager(gen, enqueue, readable) {
     _classCallCheck(this, GenObjManager);
@@ -85,7 +84,7 @@ var GenObjManager = function () {
   }, {
     key: "flush",
     value: function flush() {
-      var n = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+      var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
       if (!this.gen) return;
 
@@ -103,13 +102,12 @@ var GenObjManager = function () {
     key: "tick",
     value: function tick(msg) {
       // Get next value
-
-      var _gen$next = this.gen.next(msg);
-
-      var value = _gen$next.value;
-      var done = _gen$next.done;
+      var _gen$next = this.gen.next(msg),
+          value = _gen$next.value,
+          done = _gen$next.done;
 
       // Enqueue value to stream
+
 
       this.enqueue(value);
 
@@ -149,14 +147,10 @@ var GenObjManager = function () {
 }();
 
 function pipeGen(fn) {
-  var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-  var
-  // opts
-  init = _ref.init;
-  var readableStrategy = _ref.readableStrategy;
-  var writableStrategy = _ref.writableStrategy;
-
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      init = _ref.init,
+      readableStrategy = _ref.readableStrategy,
+      writableStrategy = _ref.writableStrategy;
 
   // Prepare transformer
   var genManager = void 0,
@@ -196,12 +190,10 @@ function pipeGen(fn) {
       _classCallCheck(this, TransformBlueprint);
 
       // Make stream
-
-      var stream = (_this = _possibleConstructorReturn(this, Object.getPrototypeOf(TransformBlueprint).call(this, transformer)), _this);
-      var _underlyingSource = stream.readable._readableStreamController._underlyingSource;
+      var stream = (_this = _possibleConstructorReturn(this, (TransformBlueprint.__proto__ || Object.getPrototypeOf(TransformBlueprint)).call(this, transformer)), _this),
+          _underlyingSource = stream.readable._readableStreamController._underlyingSource;
 
       // Bind transform function to stream
-
       transformer.transform = transformer.transform.bind(stream);
 
       // Super hacky because TransformStream doesn't allow an easy way to do this

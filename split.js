@@ -12,7 +12,7 @@ exports.default = split;
 //
 
 function split(stream) {
-  var parts = arguments.length <= 1 || arguments[1] === undefined ? 2 : arguments[1];
+  var parts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
 
   // Check for readable stream
   if (!stream.tee) throw new Error("Only readable streams can be split");

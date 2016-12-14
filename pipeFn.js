@@ -19,19 +19,14 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 //
 
 function pipeFn(fn) {
-  var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-  var
-  // opts
-  init = _ref.init;
-  var readableStrategy = _ref.readableStrategy;
-  var writableStrategy = _ref.writableStrategy;
-
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      init = _ref.init,
+      readableStrategy = _ref.readableStrategy,
+      writableStrategy = _ref.writableStrategy;
 
   // Prepare transformer
   var transformer = {
     // Run function and enqueue result
-
     transform: function transform(chunk, enqueue, done) {
       var condEnqueue = function condEnqueue(v) {
         if (v !== void 0) enqueue(v);
@@ -59,7 +54,7 @@ function pipeFn(fn) {
       _classCallCheck(this, TransformBlueprint);
 
       // Make stream
-      var stream = (_this = _possibleConstructorReturn(this, Object.getPrototypeOf(TransformBlueprint).call(this, transformer)), _this);
+      var stream = (_this = _possibleConstructorReturn(this, (TransformBlueprint.__proto__ || Object.getPrototypeOf(TransformBlueprint)).call(this, transformer)), _this);
 
       // If init, push chunk
       if (init !== void 0) stream.writable.write(init);
