@@ -35,8 +35,8 @@ function chain(origin) {
     streams[_key - 1] = arguments[_key];
   }
 
-  var writable = origin.writable;
-  var readable = _connect2.default.apply(undefined, [origin].concat(streams));
+  var writable = origin.writable,
+      readable = _connect2.default.apply(undefined, [origin].concat(streams));
 
   // Check if null stream
   if (!(0, _utils.isReadable)(readable)) throw new Error(compatibilityError);

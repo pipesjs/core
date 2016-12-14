@@ -155,8 +155,8 @@ function chain(origin) {
     streams[_key - 1] = arguments[_key];
   }
 
-  var writable = origin.writable;
-  var readable = _connect2.default.apply(undefined, [origin].concat(streams));
+  var writable = origin.writable,
+      readable = _connect2.default.apply(undefined, [origin].concat(streams));
 
   // Check if null stream
   if (!(0, _utils.isReadable)(readable)) throw new Error(compatibilityError);
@@ -392,9 +392,9 @@ function parseResults(results) {
 
   try {
     for (var _iterator = results[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      var _step$value = _step.value;
-      var value = _step$value.value;
-      var done = _step$value.done;
+      var _ref2 = _step.value;
+      var value = _ref2.value,
+          done = _ref2.done;
 
       ended = ended || done;
       values.push(value);
@@ -459,9 +459,9 @@ function merge() {
         push = void 0;
 
     // Read values and push them onto the stream
-    push = function push(_ref) {
-      var value = _ref.value;
-      var done = _ref.done;
+    push = function push(_ref3) {
+      var value = _ref3.value,
+          done = _ref3.done;
 
       if (done) return controller.close();
 
@@ -558,12 +558,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 //
 
 function pipeAsync(fn) {
-  var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-  var init = _ref.init;
-  var readableStrategy = _ref.readableStrategy;
-  var writableStrategy = _ref.writableStrategy;
-
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      init = _ref.init,
+      readableStrategy = _ref.readableStrategy,
+      writableStrategy = _ref.writableStrategy;
 
   // Prepare transformer
   var transformer = {
@@ -571,7 +569,7 @@ function pipeAsync(fn) {
     _unfulfilledFutures: [],
 
     // Run function and enqueue result
-    transform: function transform(chunk, enqueue, done) {
+    transform: function transform(chunk, done, enqueue) {
       // Run async fn
       var self = transformer,
           future = fn(chunk),
@@ -628,11 +626,17 @@ function pipeAsync(fn) {
       _classCallCheck(this, TransformBlueprint);
 
       // Make stream
-      var stream = (_this = _possibleConstructorReturn(this, Object.getPrototypeOf(TransformBlueprint).call(this, transformer)), _this),
-          writer = stream.writable.getWriter();
+      var stream = (_this = _possibleConstructorReturn(this, (TransformBlueprint.__proto__ || Object.getPrototypeOf(TransformBlueprint)).call(this, transformer)), _this),
+          writer = void 0;
 
       // If init, push chunk
-      if (init !== void 0) writer.write(init);
+      if (init !== void 0) {
+        writer = stream.writable.getWriter();
+        writer.write(init);
+
+        // Release lock so other writers can start writing
+        writer.releaseLock();
+      }
 
       return _ret = stream, _possibleConstructorReturn(_this, _ret);
     }
@@ -670,22 +674,18 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 //
 
 function pipeFn(fn) {
-  var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-  var init = _ref.init;
-  var readableStrategy = _ref.readableStrategy;
-  var writableStrategy = _ref.writableStrategy;
-
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      init = _ref.init,
+      readableStrategy = _ref.readableStrategy,
+      writableStrategy = _ref.writableStrategy;
 
   // Prepare transformer
   var transformer = {
     // Run function and enqueue result
-    transform: function transform(chunk, enqueue, done) {
-      var condEnqueue = function condEnqueue(v) {
-        if (v !== void 0) enqueue(v);
-      };
+    transform: function transform(chunk, done, enqueue) {
+      var v = fn(chunk);
 
-      condEnqueue(fn(chunk));
+      if (v !== void 0) enqueue(v);
 
       return done();
     },
@@ -707,11 +707,17 @@ function pipeFn(fn) {
       _classCallCheck(this, TransformBlueprint);
 
       // Make stream
-      var stream = (_this = _possibleConstructorReturn(this, Object.getPrototypeOf(TransformBlueprint).call(this, transformer)), _this),
-          writer = stream.writable.getWriter();
+      var stream = (_this = _possibleConstructorReturn(this, (TransformBlueprint.__proto__ || Object.getPrototypeOf(TransformBlueprint)).call(this, transformer)), _this),
+          writer = void 0;
 
       // If init, push chunk
-      if (init !== void 0) writer.write(init);
+      if (init !== void 0) {
+        writer = stream.writable.getWriter();
+        writer.write(init);
+
+        // Release lock so other writers can start writing
+        writer.releaseLock();
+      }
 
       return _ret = stream, _possibleConstructorReturn(_this, _ret);
     }
@@ -799,7 +805,7 @@ var GenObjManager = function () {
       this.pause();
 
       // Close generator
-      this.gen.return();
+      this.gen && this.gen.return();
       this.gen = null;
 
       // Call done
@@ -811,7 +817,7 @@ var GenObjManager = function () {
   }, {
     key: "flush",
     value: function flush() {
-      var n = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+      var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
       if (!this.gen) return;
 
@@ -829,12 +835,12 @@ var GenObjManager = function () {
     key: "tick",
     value: function tick(msg) {
       // Get next value
-      var _gen$next = this.gen.next(msg);
-
-      var value = _gen$next.value;
-      var done = _gen$next.done;
+      var _gen$next = this.gen.next(msg),
+          value = _gen$next.value,
+          done = _gen$next.done;
 
       // Enqueue value to stream
+
 
       this.enqueue(value);
 
@@ -874,19 +880,19 @@ var GenObjManager = function () {
 }();
 
 function pipeGen(fn) {
-  var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-  var init = _ref.init;
-  var readableStrategy = _ref.readableStrategy;
-  var writableStrategy = _ref.writableStrategy;
-
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      init = _ref.init,
+      readableStrategy = _ref.readableStrategy,
+      writableStrategy = _ref.writableStrategy;
 
   // Prepare transformer
   var genManager = void 0,
       transformer = {
-    transform: function transform(chunk, enqueue, done) {
+    transform: function transform(chunk, done, enqueue) {
       // Create generator manager
-      genManager = new GenObjManager(fn(chunk), enqueue, this.readable);
+      var gen = fn(chunk);
+
+      genManager = new GenObjManager(gen, enqueue, this.readable);
 
       // Set up closing
       genManager.then(function () {
@@ -919,12 +925,11 @@ function pipeGen(fn) {
       _classCallCheck(this, TransformBlueprint);
 
       // Make stream
-      var stream = (_this = _possibleConstructorReturn(this, Object.getPrototypeOf(TransformBlueprint).call(this, transformer)), _this);
-      var writer = stream.writable.getWriter();
-      var _underlyingSource = stream.readable._readableStreamController._underlyingSource;
+      var stream = (_this = _possibleConstructorReturn(this, (TransformBlueprint.__proto__ || Object.getPrototypeOf(TransformBlueprint)).call(this, transformer)), _this),
+          _underlyingSource = stream.readable._readableStreamController._underlyingSource,
+          writer = void 0;
 
       // Bind transform function to stream
-
       transformer.transform = transformer.transform.bind(stream);
 
       // Super hacky because TransformStream doesn't allow an easy way to do this
@@ -939,7 +944,13 @@ function pipeGen(fn) {
       };
 
       // If init, push chunk
-      if (init !== void 0) writer.write(init);
+      if (init !== void 0) {
+        writer = stream.writable.getWriter();
+        writer.write(init);
+
+        // Release lock so other writers can start writing
+        writer.releaseLock();
+      }
 
       return _ret = stream, _possibleConstructorReturn(_this, _ret);
     }
@@ -967,7 +978,7 @@ exports.default = split;
 //
 
 function split(stream) {
-  var parts = arguments.length <= 1 || arguments[1] === undefined ? 2 : arguments[1];
+  var parts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
 
   // Check for readable stream
   if (!stream.tee) throw new Error("Only readable streams can be split");

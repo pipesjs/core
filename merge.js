@@ -19,9 +19,9 @@ function parseResults(results) {
 
   try {
     for (var _iterator = results[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      var _step$value = _step.value;
-      var value = _step$value.value;
-      var done = _step$value.done;
+      var _ref2 = _step.value;
+      var value = _ref2.value,
+          done = _ref2.done;
 
       ended = ended || done;
       values.push(value);
@@ -86,9 +86,9 @@ function merge() {
         push = void 0;
 
     // Read values and push them onto the stream
-    push = function push(_ref) {
-      var value = _ref.value;
-      var done = _ref.done;
+    push = function push(_ref3) {
+      var value = _ref3.value,
+          done = _ref3.done;
 
       if (done) return controller.close();
 

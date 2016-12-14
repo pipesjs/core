@@ -35,11 +35,9 @@ function zip() {
 
   // Create applier
   applier = (0, _pipe2.default)(function (chunks) {
-    var _chunks = _toArray(chunks);
-
-    var fn = _chunks[0];
-
-    var args = _chunks.slice(1);
+    var _chunks = _toArray(chunks),
+        fn = _chunks[0],
+        args = _chunks.slice(1);
 
     return fn.apply(undefined, _toConsumableArray(args));
   });

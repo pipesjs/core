@@ -19,12 +19,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 //
 
 function pipeFn(fn) {
-  var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-  var init = _ref.init;
-  var readableStrategy = _ref.readableStrategy;
-  var writableStrategy = _ref.writableStrategy;
-
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      init = _ref.init,
+      readableStrategy = _ref.readableStrategy,
+      writableStrategy = _ref.writableStrategy;
 
   // Prepare transformer
   var transformer = {
@@ -54,7 +52,7 @@ function pipeFn(fn) {
       _classCallCheck(this, TransformBlueprint);
 
       // Make stream
-      var stream = (_this = _possibleConstructorReturn(this, Object.getPrototypeOf(TransformBlueprint).call(this, transformer)), _this),
+      var stream = (_this = _possibleConstructorReturn(this, (TransformBlueprint.__proto__ || Object.getPrototypeOf(TransformBlueprint)).call(this, transformer)), _this),
           writer = void 0;
 
       // If init, push chunk

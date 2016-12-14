@@ -72,7 +72,7 @@ var GenObjManager = function () {
       this.pause();
 
       // Close generator
-      this.gen.return();
+      this.gen && this.gen.return();
       this.gen = null;
 
       // Call done
@@ -84,7 +84,7 @@ var GenObjManager = function () {
   }, {
     key: "flush",
     value: function flush() {
-      var n = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+      var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
       if (!this.gen) return;
 
@@ -102,12 +102,12 @@ var GenObjManager = function () {
     key: "tick",
     value: function tick(msg) {
       // Get next value
-      var _gen$next = this.gen.next(msg);
-
-      var value = _gen$next.value;
-      var done = _gen$next.done;
+      var _gen$next = this.gen.next(msg),
+          value = _gen$next.value,
+          done = _gen$next.done;
 
       // Enqueue value to stream
+
 
       this.enqueue(value);
 
@@ -147,19 +147,19 @@ var GenObjManager = function () {
 }();
 
 function pipeGen(fn) {
-  var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-  var init = _ref.init;
-  var readableStrategy = _ref.readableStrategy;
-  var writableStrategy = _ref.writableStrategy;
-
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      init = _ref.init,
+      readableStrategy = _ref.readableStrategy,
+      writableStrategy = _ref.writableStrategy;
 
   // Prepare transformer
   var genManager = void 0,
       transformer = {
     transform: function transform(chunk, done, enqueue) {
       // Create generator manager
-      genManager = new GenObjManager(fn(chunk), enqueue, this.readable);
+      var gen = fn(chunk);
+
+      genManager = new GenObjManager(gen, enqueue, this.readable);
 
       // Set up closing
       genManager.then(function () {
@@ -192,9 +192,9 @@ function pipeGen(fn) {
       _classCallCheck(this, TransformBlueprint);
 
       // Make stream
-      var stream = (_this = _possibleConstructorReturn(this, Object.getPrototypeOf(TransformBlueprint).call(this, transformer)), _this);
-      var _underlyingSource = stream.readable._readableStreamController._underlyingSource;
-      var writer = void 0;
+      var stream = (_this = _possibleConstructorReturn(this, (TransformBlueprint.__proto__ || Object.getPrototypeOf(TransformBlueprint)).call(this, transformer)), _this),
+          _underlyingSource = stream.readable._readableStreamController._underlyingSource,
+          writer = void 0;
 
       // Bind transform function to stream
       transformer.transform = transformer.transform.bind(stream);
