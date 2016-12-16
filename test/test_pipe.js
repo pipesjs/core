@@ -94,16 +94,13 @@ test("check async promise function", done => {
   });
 });
 
-test.skip("check gen function", done => {
+test("check gen function", done => {
   let readable, writable, transform, counter = 0;
 
   // Create test streams
   readable = createTestReadable( [1,2,3] );
   writable = createTestWritable( () => counter+=1 );
   transform = pipe( function* (k) {
-
-    console.log("chunk", k );
-
     yield k;
     return k;
   });
@@ -115,9 +112,7 @@ test.skip("check gen function", done => {
   });
 
   // Connect the streams
-  assert.doesNotThrow( () => {
-    connect( readable, (new transform), writable );
-  });
+  return connect( readable, (new transform), writable );
 });
 
 test.skip("check infinite gen function", done => {
