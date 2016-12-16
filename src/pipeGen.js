@@ -115,7 +115,7 @@ export default function pipeGen ( fn, {
 
       // If init, push chunk
       if ( init !== void 0 ) {
-        writer = writable.getWriter();
+        let writer = writable.getWriter();
         writer.write( init );
 
         // Release lock so other writers can start writing

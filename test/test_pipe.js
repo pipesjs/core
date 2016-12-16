@@ -115,6 +115,27 @@ test("check gen function", done => {
   return connect( readable, (new transform), writable );
 });
 
+test("check gen function with init", done => {
+  let readable, writable, transform, counter = 0;
+
+  // Create test streams
+  readable = createTestReadable( [2,3] );
+  writable = createTestWritable( () => counter+=1 );
+  transform = pipe( function* (k) {
+    yield k;
+    return k;
+  }, { init: 1 });
+
+  // End case
+  broker.on( writable.signals.close, () => {
+    assert.equal( counter, 6 );
+    done();
+  });
+
+  // Connect the streams
+  return connect( readable, (new transform), writable );
+});
+
 test.skip("check infinite gen function", done => {
   let writable, transform, counter = 0;
 
