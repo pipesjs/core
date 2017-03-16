@@ -136,19 +136,18 @@ test("check gen function with init", done => {
   return connect( readable, (new transform), writable );
 });
 
-test.skip("check infinite gen function", done => {
-  let writable, transform, counter = 0;
+test("check infinite gen function", done => {
+  let t, writable, transform,
+    counter = 0;
 
   // Create test streams
-  writable = createTestWritable( n => {
-    if ( counter >= 6 )
-      return writable.close();
-
+  writable = createTestWritable( (n, close) => {
+    if ( counter == 6 ) return close();
     counter+=n;
   });
 
   transform = pipe( function* (k) {
-    while( !( yield k ));
+    while(!( yield k ));
   }, { init: 1 });
 
   // End case
@@ -158,8 +157,6 @@ test.skip("check infinite gen function", done => {
   });
 
   // Connect the streams
-  assert.doesNotThrow( () => {
-    connect( (new transform), writable );
-  });
+  t = new transform;
+  return connect( t, writable );
 });
-

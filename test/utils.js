@@ -45,18 +45,25 @@ export function createTestWritable (fn) {
     close: Symbol()
   };
 
+  let closeStream;
+
   let stream = new WritableStream({
     start () {
       broker.emit(signals.init);
     },
     write (chunk) {
-      fn( chunk );
+      fn( chunk, closeStream );
       broker.emit(signals.recv, chunk);
     },
     close () {
       broker.emit(signals.close);
     }
   });
+
+  closeStream = () => {
+    // FIXME: Super hacky, don't do this normally
+    stream._writer.close();
+  };
 
   stream.signals = signals;
   return stream;
