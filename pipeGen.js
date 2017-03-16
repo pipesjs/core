@@ -19,7 +19,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 // instantiate above streams.
 //
 
-var readyEvt = (0, _utils.uuid)();
+var readyEvt = (0, _utils.uuid)(),
+    closedProp = (0, _utils.uuid)();
 
 // Pump function that runs the generator and adds produced values
 // to the transform stream.
@@ -40,13 +41,12 @@ function pump(gen, controller, resolve) {
 
   // Ready? proceed
 
-  var _gen$next = gen.next(),
-      done = _gen$next.done,
-      value = _gen$next.value;
+  // Check readable status
+  var step = controller[closedProp] ? gen.return(true) : gen.next(false),
+      done = step.done,
+      value = step.value;
 
   // Enqueue
-
-
   controller.enqueue(value);
 
   // Generator exhausted? resolve promise
@@ -100,6 +100,8 @@ function pipeGen(fn) {
         return promise;
       },
       close: function close() {
+        // Signal generator to stop
+        readableController[closedProp] = true;
         readableController.close();
       }
     }, writableStrategy);
@@ -107,6 +109,7 @@ function pipeGen(fn) {
     // readable
     readable = new _streams.ReadableStream({
       start: function start(controller) {
+        controller[closedProp] = false;
         readableController = controller;
 
         // Signal writable to start
