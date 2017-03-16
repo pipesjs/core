@@ -11,7 +11,9 @@
 import { ReadableStream, WritableStream } from "./streams";
 import { uuid, events, isFunction } from "./utils";
 
-const readyEvt = uuid();
+const
+  readyEvt = uuid(),
+  closedProp = uuid();
 
 // Pump function that runs the generator and adds produced values
 // to the transform stream.
@@ -32,7 +34,9 @@ function pump ( gen, controller, resolve ) {
 
   // Ready? proceed
   let
-    { done, value } = gen.next();
+    // Check readable status
+    step = controller[closedProp] ? gen.return(true) : gen.next(false),
+    { done, value } = step;
 
   // Enqueue
   controller.enqueue( value );
@@ -90,6 +94,8 @@ export default function pipeGen ( fn, {
         },
 
         close() {
+          // Signal generator to stop
+          readableController[closedProp] = true;
           readableController.close();
         }
       }, writableStrategy );
@@ -97,6 +103,7 @@ export default function pipeGen ( fn, {
       // readable
       readable = new ReadableStream({
         start( controller ) {
+          controller[closedProp] = false;
           readableController = controller;
 
           // Signal writable to start
@@ -134,4 +141,3 @@ export default function pipeGen ( fn, {
 // Browserify compat
 if ( typeof module !== "undefined" )
   module.exports = pipeGen;
-
