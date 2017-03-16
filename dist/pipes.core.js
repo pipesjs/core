@@ -831,9 +831,20 @@ function pipeGen(fn) {
         return promise;
       },
       close: function close() {
-        // Signal generator to stop
-        readableController[closedProp] = true;
-        readableController.close();
+        console.log("shit");
+        // Close readable stream
+        try {
+          readableController.close();
+        } catch (e) {
+          if (e instanceof TypeError) {
+            // Oops, closed already ignore
+          } else {
+            throw e;
+          }
+        } finally {
+          // Signal generator to stop
+          readableController[closedProp] = true;
+        }
       }
     }, writableStrategy);
 

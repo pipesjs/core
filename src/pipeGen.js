@@ -94,9 +94,21 @@ export default function pipeGen ( fn, {
         },
 
         close() {
-          // Signal generator to stop
-          readableController[closedProp] = true;
-          readableController.close();
+          // Close readable stream
+          try {
+            readableController.close();
+
+          } catch (e) {
+            if ( e instanceof TypeError ) {
+              // Oops, closed already. Ignore
+            } else {
+              throw e;
+            }
+
+          } finally {
+            // Signal generator to stop
+            readableController[closedProp] = true;
+          }
         }
       }, writableStrategy );
 
