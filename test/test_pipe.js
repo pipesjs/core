@@ -19,14 +19,14 @@ test("check instantiation", () => {
     transform3 = new pipe( function* (k) { return k } );
 
   // Check instantiation
-  assert( transform1.readable );
-  assert( transform1.writable );
+  assert( transform1.readable &&
+    transform1.writable );
 
-  assert( transform2.readable );
-  assert( transform2.writable );
+  assert( transform2.readable &&
+    transform2.writable );
 
-  assert( transform3.readable );
-  assert( transform3.writable );
+  assert( transform3.readable &&
+    transform3.writable );
 });
 
 test("check simple function", done => {
@@ -106,30 +106,48 @@ test("check gen function", done => {
   });
 
   // End case
-  broker.on(writable.signals.close, () => {
+  broker.on( writable.signals.close, () => {
     assert.equal( counter, 6 );
     done();
   });
 
   // Connect the streams
-  assert.doesNotThrow( () => {
-    connect( readable, (new transform), writable );
+  return connect( readable, (new transform), writable );
+});
+
+test("check gen function with init", done => {
+  let readable, writable, transform, counter = 0;
+
+  // Create test streams
+  readable = createTestReadable( [2,3] );
+  writable = createTestWritable( () => counter+=1 );
+  transform = pipe( function* (k) {
+    yield k;
+    return k;
+  }, { init: 1 });
+
+  // End case
+  broker.on( writable.signals.close, () => {
+    assert.equal( counter, 6 );
+    done();
   });
+
+  // Connect the streams
+  return connect( readable, (new transform), writable );
 });
 
 test("check infinite gen function", done => {
-  let writable, transform, counter = 0;
+  let t, writable, transform,
+    counter = 0;
 
   // Create test streams
-  writable = createTestWritable( n => {
-    if ( counter >= 6 )
-      return writable.close();
-
+  writable = createTestWritable( (n, close) => {
+    if ( counter == 6 ) return close();
     counter+=n;
   });
 
   transform = pipe( function* (k) {
-    while( !( yield k ));
+    while(!( yield k ));
   }, { init: 1 });
 
   // End case
@@ -139,8 +157,6 @@ test("check infinite gen function", done => {
   });
 
   // Connect the streams
-  assert.doesNotThrow( () => {
-    connect( (new transform), writable );
-  });
+  t = new transform;
+  return connect( t, writable );
 });
-

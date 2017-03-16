@@ -21,14 +21,14 @@ export default function pipeAsync ( fn, {
     _unfulfilledFutures: [],
 
     // Run function and enqueue result
-    transform ( chunk, enqueue, done ) {
+    transform ( chunk, controller ) {
       // Run async fn
       let
         self = transformer,
         future = fn( chunk ),
         condEnqueue = v => {
           if ( v !== void 0 )
-            enqueue( v );
+            controller.enqueue( v );
         },
 
         // Get index of current future
@@ -45,23 +45,21 @@ export default function pipeAsync ( fn, {
         })
 
         // Remove itself from the _unfulfilledFutures list
-        .then( () => self._unfulfilledFutures.splice( findex, 1 ) )
-        .then( done );
+        .then( () => self._unfulfilledFutures.splice( findex, 1 ) );
 
       return future;
     },
 
-    flush ( enqueue, close ) {
+    flush ( controller ) {
       let self = transformer,
         condEnqueue = v => {
           if ( v !== void 0 )
-            enqueue( v );
+            controller.enqueue( v );
         };
 
       // Check if anything is left
       Promise.all( self._unfulfilledFutures )
-        .then( vs => vs.map( condEnqueue ))
-        .then( close );
+        .then( vs => vs.map( condEnqueue ));
     },
 
     // if passed
@@ -73,11 +71,19 @@ export default function pipeAsync ( fn, {
   class TransformBlueprint extends TransformStream {
     constructor () {
       // Make stream
-      let stream = super( transformer );
+      let
+        stream = super( transformer ),
+        writer;
 
       // If init, push chunk
-      if ( init !== void 0 )
-        stream.writable.write( init );
+      if ( init !== void 0 ) {
+        writer = stream.writable.getWriter();
+        writer.write( init );
+
+        // Release lock so other writers can start writing
+        writer.releaseLock();
+      }
+
 
       return stream;
     }

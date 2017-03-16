@@ -27,14 +27,10 @@ function pipeFn(fn) {
   // Prepare transformer
   var transformer = {
     // Run function and enqueue result
-    transform: function transform(chunk, enqueue, done) {
-      var condEnqueue = function condEnqueue(v) {
-        if (v !== void 0) enqueue(v);
-      };
+    transform: function transform(chunk, controller) {
+      var v = fn(chunk);
 
-      condEnqueue(fn(chunk));
-
-      return done();
+      if (v !== void 0) controller.enqueue(v);
     },
 
 
@@ -54,10 +50,17 @@ function pipeFn(fn) {
       _classCallCheck(this, TransformBlueprint);
 
       // Make stream
-      var stream = (_this = _possibleConstructorReturn(this, (TransformBlueprint.__proto__ || Object.getPrototypeOf(TransformBlueprint)).call(this, transformer)), _this);
+      var stream = (_this = _possibleConstructorReturn(this, (TransformBlueprint.__proto__ || Object.getPrototypeOf(TransformBlueprint)).call(this, transformer)), _this),
+          writer = void 0;
 
       // If init, push chunk
-      if (init !== void 0) stream.writable.write(init);
+      if (init !== void 0) {
+        writer = stream.writable.getWriter();
+        writer.write(init);
+
+        // Release lock so other writers can start writing
+        writer.releaseLock();
+      }
 
       return _ret = stream, _possibleConstructorReturn(_this, _ret);
     }

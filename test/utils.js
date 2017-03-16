@@ -45,12 +45,14 @@ export function createTestWritable (fn) {
     close: Symbol()
   };
 
+  let closeStream;
+
   let stream = new WritableStream({
     start () {
       broker.emit(signals.init);
     },
     write (chunk) {
-      fn( chunk );
+      fn( chunk, closeStream );
       broker.emit(signals.recv, chunk);
     },
     close () {
@@ -58,15 +60,19 @@ export function createTestWritable (fn) {
     }
   });
 
+  closeStream = () => {
+    // FIXME: Super hacky, don't do this normally
+    stream._writer.close();
+  };
+
   stream.signals = signals;
   return stream;
 }
 
 export function createTestTransform () {
   return new TransformStream({
-    transform (chunk, enqueue, done) {
-      enqueue( chunk );
-      return done();
+    transform (chunk, controller) {
+      controller.enqueue( chunk );
     }
   });
 }

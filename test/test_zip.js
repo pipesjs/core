@@ -6,7 +6,7 @@ import {
   broker
 } from "./utils";
 
-suite("merge");
+suite("zip");
 
 test("check flow", done => {
   let readable1, readable2, writable, merged, negate;

@@ -569,12 +569,12 @@ function pipeAsync(fn) {
     _unfulfilledFutures: [],
 
     // Run function and enqueue result
-    transform: function transform(chunk, enqueue, done) {
+    transform: function transform(chunk, controller) {
       // Run async fn
       var self = transformer,
           future = fn(chunk),
           condEnqueue = function condEnqueue(v) {
-        if (v !== void 0) enqueue(v);
+        if (v !== void 0) controller.enqueue(v);
       },
 
 
@@ -593,20 +593,20 @@ function pipeAsync(fn) {
       // Remove itself from the _unfulfilledFutures list
       .then(function () {
         return self._unfulfilledFutures.splice(findex, 1);
-      }).then(done);
+      });
 
       return future;
     },
-    flush: function flush(enqueue, close) {
+    flush: function flush(controller) {
       var self = transformer,
           condEnqueue = function condEnqueue(v) {
-        if (v !== void 0) enqueue(v);
+        if (v !== void 0) controller.enqueue(v);
       };
 
       // Check if anything is left
       Promise.all(self._unfulfilledFutures).then(function (vs) {
         return vs.map(condEnqueue);
-      }).then(close);
+      });
     },
 
 
@@ -626,10 +626,17 @@ function pipeAsync(fn) {
       _classCallCheck(this, TransformBlueprint);
 
       // Make stream
-      var stream = (_this = _possibleConstructorReturn(this, (TransformBlueprint.__proto__ || Object.getPrototypeOf(TransformBlueprint)).call(this, transformer)), _this);
+      var stream = (_this = _possibleConstructorReturn(this, (TransformBlueprint.__proto__ || Object.getPrototypeOf(TransformBlueprint)).call(this, transformer)), _this),
+          writer = void 0;
 
       // If init, push chunk
-      if (init !== void 0) stream.writable.write(init);
+      if (init !== void 0) {
+        writer = stream.writable.getWriter();
+        writer.write(init);
+
+        // Release lock so other writers can start writing
+        writer.releaseLock();
+      }
 
       return _ret = stream, _possibleConstructorReturn(_this, _ret);
     }
@@ -675,223 +682,10 @@ function pipeFn(fn) {
   // Prepare transformer
   var transformer = {
     // Run function and enqueue result
-    transform: function transform(chunk, enqueue, done) {
-      var condEnqueue = function condEnqueue(v) {
-        if (v !== void 0) enqueue(v);
-      };
+    transform: function transform(chunk, controller) {
+      var v = fn(chunk);
 
-      condEnqueue(fn(chunk));
-
-      return done();
-    },
-
-
-    // if passed
-    readableStrategy: readableStrategy,
-    writableStrategy: writableStrategy
-  };
-
-  // Wrap in blueprint class
-
-  var TransformBlueprint = function (_TransformStream) {
-    _inherits(TransformBlueprint, _TransformStream);
-
-    function TransformBlueprint() {
-      var _this, _ret;
-
-      _classCallCheck(this, TransformBlueprint);
-
-      // Make stream
-      var stream = (_this = _possibleConstructorReturn(this, (TransformBlueprint.__proto__ || Object.getPrototypeOf(TransformBlueprint)).call(this, transformer)), _this);
-
-      // If init, push chunk
-      if (init !== void 0) stream.writable.write(init);
-
-      return _ret = stream, _possibleConstructorReturn(_this, _ret);
-    }
-
-    return TransformBlueprint;
-  }(_streams.TransformStream);
-
-  return TransformBlueprint;
-}
-
-// Browserify compat
-if (typeof module !== "undefined") module.exports = pipeFn;
-},{"./streams":12}],10:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); // pipeGen :: Generator Function -> Opts {} -> TransformBlueprint
-// pipeGen takes a generator function and wraps it into
-// a transform streams. Waits till completion, before enqueuing.
-// All yields are enqueued, back-pressure is respected and
-// the generator paused if queue getting back-pressured.
-//
-// Returns a blueprint class that can be used to
-// instantiate above streams.
-//
-
-exports.default = pipeGen;
-
-var _streams = require("./streams");
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-// Manages generator object and consumes it
-// while taking backpressure into account
-var GenObjManager = function () {
-  function GenObjManager(gen, enqueue, readable) {
-    _classCallCheck(this, GenObjManager);
-
-    var done = void 0,
-        condEnqueue = function condEnqueue(v) {
-      if (v !== void 0) enqueue(v);
-    },
-        promise = new Promise(function (resolve) {
-      done = resolve;
-    });
-
-    // Add props
-    Object.assign(this, {
-      done: done, gen: gen, readable: readable, promise: promise,
-      enqueue: condEnqueue,
-      running: false
-    });
-  }
-
-  // Access to readable stream controller
-
-
-  _createClass(GenObjManager, [{
-    key: "start",
-
-
-    // Kick start the read loop
-    value: function start() {
-      if (this.running || !this.gen) return;
-
-      // Start the loop
-      this.running = true;
-      this.tick();
-    }
-  }, {
-    key: "pause",
-    value: function pause() {
-      this.running = false;
-    }
-  }, {
-    key: "close",
-    value: function close() {
-      this.pause();
-
-      // Close generator
-      this.gen.return();
-      this.gen = null;
-
-      // Call done
-      this.done();
-    }
-
-    // Flush the gen and close
-
-  }, {
-    key: "flush",
-    value: function flush() {
-      var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-
-      if (!this.gen) return;
-
-      // Pause
-      this.pause();
-
-      // Read gen n times
-      // passing it a true value to signal shutdown
-      while (n--) {
-        this.tick(true);
-      } // Close the generator
-      this.close();
-    }
-  }, {
-    key: "tick",
-    value: function tick(msg) {
-      // Get next value
-      var _gen$next = this.gen.next(msg),
-          value = _gen$next.value,
-          done = _gen$next.done;
-
-      // Enqueue value to stream
-
-
-      this.enqueue(value);
-
-      // Process next tick
-      if (done) {
-        this.close();
-      } else if (this.running && this.ready) {
-        this.tick(msg);
-      } else {
-        this.pause();
-      }
-    }
-  }, {
-    key: "readableController",
-    get: function get() {
-      return this.readable._readableStreamController;
-    }
-
-    // Make manager a thenable
-
-  }, {
-    key: "then",
-    get: function get() {
-      return this.promise.then.bind(this.promise);
-    }
-
-    // Get backpressure signals
-
-  }, {
-    key: "ready",
-    get: function get() {
-      return this.readableController.desiredSize >= 0;
-    }
-  }]);
-
-  return GenObjManager;
-}();
-
-function pipeGen(fn) {
-  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-      init = _ref.init,
-      readableStrategy = _ref.readableStrategy,
-      writableStrategy = _ref.writableStrategy;
-
-  // Prepare transformer
-  var genManager = void 0,
-      transformer = {
-    transform: function transform(chunk, enqueue, done) {
-      // Create generator manager
-      genManager = new GenObjManager(fn(chunk), enqueue, this.readable);
-
-      // Set up closing
-      genManager.then(function () {
-        return done();
-      });
-
-      // Start consuming
-      genManager.start();
-    },
-    flush: function flush(enqueue, close) {
-      // Flush generator
-      genManager && genManager.flush();
-      close();
+      if (v !== void 0) controller.enqueue(v);
     },
 
 
@@ -912,24 +706,16 @@ function pipeGen(fn) {
 
       // Make stream
       var stream = (_this = _possibleConstructorReturn(this, (TransformBlueprint.__proto__ || Object.getPrototypeOf(TransformBlueprint)).call(this, transformer)), _this),
-          _underlyingSource = stream.readable._readableStreamController._underlyingSource;
-
-      // Bind transform function to stream
-      transformer.transform = transformer.transform.bind(stream);
-
-      // Super hacky because TransformStream doesn't allow an easy way to do this
-      // Wrap pull so that it can signal generator to resume
-      var _pull = _underlyingSource.pull;
-      _underlyingSource.pull = function (c) {
-
-        // Resume generator manager
-        genManager && genManager.start();
-
-        return _pull(c);
-      };
+          writer = void 0;
 
       // If init, push chunk
-      if (init !== void 0) stream.writable.write(init);
+      if (init !== void 0) {
+        writer = stream.writable.getWriter();
+        writer.write(init);
+
+        // Release lock so other writers can start writing
+        writer.releaseLock();
+      }
 
       return _ret = stream, _possibleConstructorReturn(_this, _ret);
     }
@@ -941,8 +727,153 @@ function pipeGen(fn) {
 }
 
 // Browserify compat
+if (typeof module !== "undefined") module.exports = pipeFn;
+},{"./streams":12}],10:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = pipeGen;
+
+var _streams = require("./streams");
+
+var _utils = require("./utils");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } // pipeGen :: Generator Function -> Opts {} -> ReadableWritableBlueprint
+// pipeGen takes a generator function and wraps it into
+// a transform streams. Waits till completion, before enqueuing.
+// All yields are enqueued, back-pressure is respected and
+// the generator paused if queue getting back-pressured.
+//
+// Returns a blueprint class that can be used to
+// instantiate above streams.
+//
+
+var readyEvt = (0, _utils.uuid)(),
+    closedProp = (0, _utils.uuid)();
+
+// Pump function that runs the generator and adds produced values
+// to the transform stream.
+function pump(gen, controller, resolve) {
+
+  // Clear queue
+  _utils.events.off(readyEvt);
+
+  // Check stream state
+  var backpressure = controller.desiredSize <= 0;
+
+  // Wait for backpressure to ease
+  if (backpressure) {
+    return _utils.events.on(readyEvt, function () {
+      pump(gen, controller, resolve);
+    });
+  }
+
+  // Ready? proceed
+
+  // Check readable status
+  var step = controller[closedProp] ? gen.return(true) : gen.next(false),
+      done = step.done,
+      value = step.value;
+
+  // Enqueue
+  controller.enqueue(value);
+
+  // Generator exhausted? resolve promise
+  if (done) {
+    return resolve && resolve();
+  }
+
+  // Else rinse, repeat
+  return pump(gen, controller, resolve);
+}
+
+function pipeGen(fn) {
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      init = _ref.init,
+      readableStrategy = _ref.readableStrategy,
+      writableStrategy = _ref.writableStrategy;
+
+  return function ReadableWritableBlueprint() {
+    _classCallCheck(this, ReadableWritableBlueprint);
+
+    // Init
+    var readable = void 0,
+        writable = void 0,
+        readableReady = void 0,
+        readableReady_resolve = void 0,
+        readableController = void 0,
+        cancelled = void 0;
+
+    // create promise that awaits both streams to start
+    readableReady = new Promise(function (resolve) {
+      readableReady_resolve = resolve;
+    });
+
+    // writable
+    writable = new _streams.WritableStream({
+      start: function start() {
+        return readableReady;
+      },
+      write: function write(chunk, controller) {
+        var promise = void 0,
+            _resolve = void 0;
+
+        promise = new Promise(function (resolve) {
+          _resolve = resolve;
+        });
+
+        // Start pump
+        var gen = fn(chunk);
+        pump(gen, readableController, _resolve);
+
+        return promise;
+      },
+      close: function close() {
+        // Signal generator to stop
+        readableController[closedProp] = true;
+        readableController.close();
+      }
+    }, writableStrategy);
+
+    // readable
+    readable = new _streams.ReadableStream({
+      start: function start(controller) {
+        controller[closedProp] = false;
+        readableController = controller;
+
+        // Signal writable to start
+        readableReady_resolve();
+      },
+      pull: function pull() {
+        _utils.events.trigger(readyEvt);
+      },
+      cancel: function cancel(reason) {
+        // Close writable
+        writable.abort();
+      }
+    }, readableStrategy);
+
+    // If init, push chunk
+    if (init !== void 0) {
+      var writer = writable.getWriter();
+      writer.write(init);
+
+      // Release lock so other writers can start writing
+      writer.releaseLock();
+    }
+
+    // Return { readable, writable } pair
+    Object.assign(this, {
+      readable: readable, writable: writable
+    });
+  };
+}
+
+// Browserify compat
 if (typeof module !== "undefined") module.exports = pipeGen;
-},{"./streams":12}],11:[function(require,module,exports){
+},{"./streams":12,"./utils":13}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1046,16 +977,64 @@ exports.default = interfaces;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 exports.zipWith = zipWith;
+exports.uuid = uuid;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// Events
+var Events = exports.Events = function () {
+  function Events() {
+    _classCallCheck(this, Events);
+
+    this._events = {};
+  }
+
+  _createClass(Events, [{
+    key: "trigger",
+    value: function trigger(name) {
+      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      if (name in this._events) {
+        // Trigger all handlers
+        this._events[name].forEach(function (fn) {
+          return fn.apply(undefined, args);
+        });
+      }
+    }
+  }, {
+    key: "on",
+    value: function on(name, fn) {
+      this._events[name] = this._events[name] || [];
+      this._events[name].push(fn);
+    }
+  }, {
+    key: "off",
+    value: function off(name) {
+      this._events[name] = [];
+    }
+  }]);
+
+  return Events;
+}();
+
 // Utils
-var isTransform = exports.isTransform = function isTransform(s) {
+
+
+var events = exports.events = new Events(),
+    isTransform = exports.isTransform = function isTransform(s) {
   return s && s.writable && s.readable;
 },
     isReadable = exports.isReadable = function isReadable(s) {
   return s && s.pipeThrough;
 },
     isWritable = exports.isWritable = function isWritable(s) {
-  return s && s.write;
+  return s && s.getWriter;
 },
 
 
@@ -1080,5 +1059,11 @@ function zipWith(fn, arr1, arr2) {
   while (arr1.length && arr2.length) {
     res.push(fn(arr1.pop(), arr2.pop()));
   }return res;
+}
+
+// Generate uuids
+// From: https://gist.github.com/jed/982883
+function uuid(a) {
+  return a ? (a ^ Math.random() * 16 >> a / 4).toString(16) : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, uuid);
 }
 },{}]},{},[5]);

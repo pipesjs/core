@@ -17,15 +17,11 @@ export default function pipeFn ( fn, {
   // Prepare transformer
   let transformer = {
     // Run function and enqueue result
-    transform ( chunk, enqueue, done ) {
-      let condEnqueue = v => {
-          if ( v !== void 0 )
-            enqueue( v );
-        };
+    transform ( chunk, controller ) {
+      let v = fn( chunk );
 
-      condEnqueue( fn ( chunk ));
-
-      return done();
+      if ( v !== void 0 )
+        controller.enqueue( v );
     },
 
     // if passed
@@ -37,11 +33,18 @@ export default function pipeFn ( fn, {
   class TransformBlueprint extends TransformStream {
     constructor () {
       // Make stream
-      let stream = super( transformer );
+      let
+        stream = super( transformer ),
+        writer;
 
       // If init, push chunk
-      if ( init !== void 0 )
-        stream.writable.write( init );
+      if ( init !== void 0 ) {
+        writer = stream.writable.getWriter();
+        writer.write( init );
+
+        // Release lock so other writers can start writing
+        writer.releaseLock();
+      }
 
       return stream;
     }

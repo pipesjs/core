@@ -13,11 +13,13 @@ test("check instantiation", () => {
   let accumulated = new accumulate( (a, b) => a+b );
 
   // Check instantiation
-  assert( accumulated.readable );
-  assert( accumulated.writable );
+  assert(
+    accumulated.readable &&
+    accumulated.writable
+  );
 });
 
-test("check reducer", done => {
+test("check reducer", () => {
   let readable, writable, accumulated, total;
 
   // Create test streams
@@ -26,20 +28,16 @@ test("check reducer", done => {
     total = val;
   });
 
-  // End case
-  broker.on(writable.signals.close, () => {
-    assert.equal( total, 6 );
-    done();
-  });
-
   // Connect the streams
-  assert.doesNotThrow( () => {
-    accumulated = accumulate( (a, b) => a+b );
-    connect( readable, (new accumulated), writable );
-  });
+  accumulated = accumulate( (a, b) => a+b );
+
+  return (
+    connect( readable, (new accumulated), writable )
+      .then( () => assert.equal( total, 6 ) )
+  );
 });
 
-test("check reducer with init value", done => {
+test("check reducer with init value", () => {
   let readable, writable, accumulated, total;
 
   // Create test streams
@@ -48,17 +46,13 @@ test("check reducer with init value", done => {
     total = val;
   });
 
-  // End case
-  broker.on(writable.signals.close, () => {
-    assert.equal( total, 10 );
-    done();
-  });
-
   // Connect the streams
-  assert.doesNotThrow( () => {
-    accumulated = accumulate( (a, b) => a+b, 4 );
-    connect( readable, (new accumulated), writable );
-  });
+  accumulated = accumulate( (a, b) => a+b, 4 );
+
+  return (
+    connect( readable, (new accumulated), writable )
+      .then( () => assert.equal( total, 10 ) )
+  );
 });
 
 

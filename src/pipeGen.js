@@ -1,4 +1,4 @@
-// pipeGen :: Generator Function -> Opts {} -> TransformBlueprint
+// pipeGen :: Generator Function -> Opts {} -> ReadableWritableBlueprint
 // pipeGen takes a generator function and wraps it into
 // a transform streams. Waits till completion, before enqueuing.
 // All yields are enqueued, back-pressure is respected and
@@ -8,97 +8,46 @@
 // instantiate above streams.
 //
 
-import { TransformStream } from "./streams";
+import { ReadableStream, WritableStream } from "./streams";
+import { uuid, events, isFunction } from "./utils";
 
-// Manages generator object and consumes it
-// while taking backpressure into account
-class GenObjManager {
-  constructor ( gen, enqueue, readable ) {
-    let
-      done,
-      condEnqueue = v => {
-        if ( v !== void 0 )
-          enqueue( v );
-      },
-      promise = new Promise( resolve => { done = resolve });
+const
+  readyEvt = uuid(),
+  closedProp = uuid();
 
-    // Add props
-    Object.assign( this, {
-      done, gen, readable, promise,
-      enqueue: condEnqueue,
-      running: false
+// Pump function that runs the generator and adds produced values
+// to the transform stream.
+function pump ( gen, controller, resolve ) {
+
+  // Clear queue
+  events.off( readyEvt );
+
+  // Check stream state
+  let backpressure = controller.desiredSize <= 0;
+
+  // Wait for backpressure to ease
+  if ( backpressure ) {
+    return events.on( readyEvt, () => {
+      pump( gen, controller, resolve );
     });
   }
 
-  // Access to readable stream controller
-  get readableController () { return this.readable._readableStreamController; }
+  // Ready? proceed
+  let
+    // Check readable status
+    step = controller[closedProp] ? gen.return(true) : gen.next(false),
+    { done, value } = step;
 
-  // Make manager a thenable
-  get then () { return this.promise.then.bind(this.promise); }
+  // Enqueue
+  controller.enqueue( value );
 
-  // Get backpressure signals
-  get ready () { return this.readableController.desiredSize >= 0 }
-
-  // Kick start the read loop
-  start () {
-    if ( this.running || !this.gen )
-      return;
-
-    // Start the loop
-    this.running = true;
-    this.tick();
+  // Generator exhausted? resolve promise
+  if ( done ) {
+    return resolve && resolve();
   }
 
-  pause () {
-    this.running = false;
-  }
-
-  close () {
-    this.pause();
-
-    // Close generator
-    this.gen.return();
-    this.gen = null;
-
-    // Call done
-    this.done();
-  }
-
-  // Flush the gen and close
-  flush (n=1) {
-    if ( !this.gen )
-      return;
-
-    // Pause
-    this.pause();
-
-    // Read gen n times
-    // passing it a true value to signal shutdown
-    while (n--)
-      this.tick( true );
-
-    // Close the generator
-    this.close();
-  }
-
-  tick ( msg ) {
-    // Get next value
-    let { value, done } = this.gen.next( msg );
-
-    // Enqueue value to stream
-    this.enqueue( value );
-
-    // Process next tick
-    if ( done ) {
-      this.close();
-
-    } else if ( this.running && this.ready ) {
-      this.tick( msg );
-
-    } else {
-      this.pause();
-    }
-  }
+  // Else rinse, repeat
+  return pump( gen, controller, resolve );
 }
 
 export default function pipeGen ( fn, {
@@ -108,70 +57,87 @@ export default function pipeGen ( fn, {
     writableStrategy
   }={} ) {
 
-  // Prepare transformer
-  let
-    genManager,
-    transformer = {
-    transform ( chunk, enqueue, done ) {
-      // Create generator manager
-      genManager = new GenObjManager(
-        fn( chunk ),
-        enqueue,
-        this.readable
-      );
+  return class ReadableWritableBlueprint {
+    constructor() {
 
-      // Set up closing
-      genManager.then( () => done() );
-
-      // Start consuming
-      genManager.start();
-    },
-
-    flush ( enqueue, close ) {
-      // Flush generator
-      genManager && genManager.flush();
-      close();
-    },
-
-    // if passed
-    readableStrategy,
-    writableStrategy
-  };
-
-  // Wrap in blueprint class
-  class TransformBlueprint extends TransformStream {
-    constructor () {
-      // Make stream
+      // Init
       let
-        stream = super( transformer ),
-        { _underlyingSource } = stream.readable._readableStreamController;
+        readable, writable,
+        readableReady, readableReady_resolve,
+        readableController,
+        cancelled;
 
-      // Bind transform function to stream
-      transformer.transform = transformer.transform.bind(stream);
+      // create promise that awaits both streams to start
+      readableReady = new Promise( resolve => {
+        readableReady_resolve = resolve;
+      });
 
-      // Super hacky because TransformStream doesn't allow an easy way to do this
-      // Wrap pull so that it can signal generator to resume
-      let _pull = _underlyingSource.pull;
-      _underlyingSource.pull = c => {
 
-        // Resume generator manager
-        genManager && genManager.start();
+      // writable
+      writable = new WritableStream({
+        start() {
+          return readableReady;
+        },
 
-        return _pull(c);
-      }
+        write( chunk, controller ) {
+          let promise, _resolve;
+
+          promise = new Promise( resolve => {
+            _resolve = resolve;
+          });
+
+          // Start pump
+          let gen = fn( chunk );
+          pump( gen, readableController, _resolve );
+
+          return promise;
+        },
+
+        close() {
+          // Signal generator to stop
+          readableController[closedProp] = true;
+          readableController.close();
+        }
+      }, writableStrategy );
+
+      // readable
+      readable = new ReadableStream({
+        start( controller ) {
+          controller[closedProp] = false;
+          readableController = controller;
+
+          // Signal writable to start
+          readableReady_resolve();
+        },
+
+        pull() {
+          events.trigger( readyEvt );
+        },
+
+        cancel( reason ) {
+          // Close writable
+          writable.abort();
+        }
+      }, readableStrategy );
 
       // If init, push chunk
-      if ( init !== void 0 )
-        stream.writable.write( init );
+      if ( init !== void 0 ) {
+        let writer = writable.getWriter();
+        writer.write( init );
 
-      return stream;
+        // Release lock so other writers can start writing
+        writer.releaseLock();
+      }
+
+      // Return { readable, writable } pair
+      Object.assign( this, {
+        readable, writable
+      });
+
     }
   }
-
-  return TransformBlueprint;
 }
 
 // Browserify compat
 if ( typeof module !== "undefined" )
   module.exports = pipeGen;
-

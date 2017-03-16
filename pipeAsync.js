@@ -31,12 +31,12 @@ function pipeAsync(fn) {
     _unfulfilledFutures: [],
 
     // Run function and enqueue result
-    transform: function transform(chunk, enqueue, done) {
+    transform: function transform(chunk, controller) {
       // Run async fn
       var self = transformer,
           future = fn(chunk),
           condEnqueue = function condEnqueue(v) {
-        if (v !== void 0) enqueue(v);
+        if (v !== void 0) controller.enqueue(v);
       },
 
 
@@ -55,20 +55,20 @@ function pipeAsync(fn) {
       // Remove itself from the _unfulfilledFutures list
       .then(function () {
         return self._unfulfilledFutures.splice(findex, 1);
-      }).then(done);
+      });
 
       return future;
     },
-    flush: function flush(enqueue, close) {
+    flush: function flush(controller) {
       var self = transformer,
           condEnqueue = function condEnqueue(v) {
-        if (v !== void 0) enqueue(v);
+        if (v !== void 0) controller.enqueue(v);
       };
 
       // Check if anything is left
       Promise.all(self._unfulfilledFutures).then(function (vs) {
         return vs.map(condEnqueue);
-      }).then(close);
+      });
     },
 
 
@@ -88,10 +88,17 @@ function pipeAsync(fn) {
       _classCallCheck(this, TransformBlueprint);
 
       // Make stream
-      var stream = (_this = _possibleConstructorReturn(this, (TransformBlueprint.__proto__ || Object.getPrototypeOf(TransformBlueprint)).call(this, transformer)), _this);
+      var stream = (_this = _possibleConstructorReturn(this, (TransformBlueprint.__proto__ || Object.getPrototypeOf(TransformBlueprint)).call(this, transformer)), _this),
+          writer = void 0;
 
       // If init, push chunk
-      if (init !== void 0) stream.writable.write(init);
+      if (init !== void 0) {
+        writer = stream.writable.getWriter();
+        writer.write(init);
+
+        // Release lock so other writers can start writing
+        writer.releaseLock();
+      }
 
       return _ret = stream, _possibleConstructorReturn(_this, _ret);
     }
