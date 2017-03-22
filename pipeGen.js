@@ -100,13 +100,12 @@ function pipeGen(fn) {
         return promise;
       },
       close: function close() {
-        console.log("shit");
         // Close readable stream
         try {
           readableController.close();
         } catch (e) {
           if (e instanceof TypeError) {
-            // Oops, closed already ignore
+            // Oops, closed already. Ignore
           } else {
             throw e;
           }
@@ -120,8 +119,8 @@ function pipeGen(fn) {
     // readable
     readable = new _streams.ReadableStream({
       start: function start(controller) {
-        controller[closedProp] = false;
         readableController = controller;
+        readableController[closedProp] = false;
 
         // Signal writable to start
         readableReady_resolve();
@@ -131,7 +130,10 @@ function pipeGen(fn) {
       },
       cancel: function cancel(reason) {
         // Close writable
-        writable.abort();
+        writable._write.close();
+
+        // Tell gen to stop
+        readableController[closedProp] = true;
       }
     }, readableStrategy);
 

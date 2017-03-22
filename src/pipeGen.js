@@ -115,8 +115,8 @@ export default function pipeGen ( fn, {
       // readable
       readable = new ReadableStream({
         start( controller ) {
-          controller[closedProp] = false;
           readableController = controller;
+          readableController[closedProp] = false;
 
           // Signal writable to start
           readableReady_resolve();
@@ -128,7 +128,10 @@ export default function pipeGen ( fn, {
 
         cancel( reason ) {
           // Close writable
-          writable.abort();
+          writable._write.close();
+
+          // Tell gen to stop
+          readableController[closedProp] = true;
         }
       }, readableStrategy );
 
