@@ -1,3 +1,5 @@
+// @flow
+
 // accumulate :: Function -> InitValue -> ReadableWritableBlueprint
 // accumulate function takes a reducer function,
 // and an optional inital value.
@@ -17,28 +19,35 @@
 // entirely consumed.
 //
 
-import { ReadableStream, WritableStream } from "./streams";
+import type { ReadableStreamController } from "./streams";
+import {
+    ReadableStream, WritableStream
+} from "./streams";
+
 import { isFunction } from "./utils";
 
 const
-  compatibilityError = `
+  compatibilityError : string = `
     accumulate takes a reducing function
   `;
 
-export default function accumulate(reducer, init) {
+export default function accumulate(reducer: (mixed, mixed) => mixed, init: ?mixed) {
   // check if reducer is a function
   if ( !isFunction( reducer ))
     throw new Error( compatibilityError );
 
   class ReadableWritableBlueprint {
+    readable: ReadableStream;
+    writable: WritableStream;
+
     constructor() {
 
       // Init
       let
-        result = init,
-        readable, writable,
-        done, resolved, rejected,
-        cancelled;
+        result: ?mixed = init,
+        readable: ?ReadableStream, writable: ?WritableStream,
+        done: Promise<mixed>, resolved: (mixed) => void, rejected: (mixed) => void,
+        cancelled: boolean = false;
 
       // Create done promise
       done = new Promise( ( resolve, reject ) => {
@@ -48,12 +57,12 @@ export default function accumulate(reducer, init) {
 
       // writable
       writable = new WritableStream({
-        start( err ) {
+        start( err: Error ): void {
           // Reject if error
           done.catch( rejected );
         },
 
-        write( chunk ) {
+        write( chunk: mixed ): void {
           // if init not passed, set result as chunk
           if ( result === void 0 ) {
             result = chunk;
@@ -64,7 +73,7 @@ export default function accumulate(reducer, init) {
           result = reducer( result, chunk );
         },
 
-        close() {
+        close(): void {
           resolved( result );
         },
 
@@ -73,12 +82,12 @@ export default function accumulate(reducer, init) {
 
       // readable
       readable = new ReadableStream({
-        start( controller ) {
+        start( controller: ReadableStreamController ): void {
 
           // Chain enqueue and done
-          let finished = done.then(
+          let finished: Promise<mixed> = done.then(
             // Enqueue value if stream not cancelled
-            val => {
+            (val: mixed) => {
               if ( !cancelled )
                 controller.enqueue( val );
             },
@@ -88,12 +97,12 @@ export default function accumulate(reducer, init) {
           // Close when finished
           finished.then( controller.close.bind( controller ));
         },
-        cancel( reason ) {
+        cancel( reason: ?string ): void {
           // Set flag
           cancelled = true;
 
           // Close writable
-          writable.close();
+          writable && writable.close();
 
           // Resolve promise
           resolved( reason );
@@ -119,5 +128,5 @@ export default function accumulate(reducer, init) {
 
 // Browserify compat
 if ( typeof module !== "undefined" )
+  // $FlowFixMe
   module.exports = accumulate;
-

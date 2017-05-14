@@ -1,6 +1,9 @@
+// @flow
+
 // Access stream interface
 
 let interfaces,
+    // $FlowFixMe
     global = global || {};
 
 if ( typeof window !== 'undefined' )
@@ -27,6 +30,13 @@ if ( !!global.ReadableStream ) {
     throw new Error("No Stream implementation found");
   }
 }
+
+export type ReadableStreamController = {
+  desiredSize: number,
+  close: () => void,
+  enqueue: (mixed) => mixed,
+  error: (string | Error) => void
+};
 
 export const
   ReadableStream = interfaces.ReadableStream,
