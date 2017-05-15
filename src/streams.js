@@ -41,6 +41,8 @@ export const
 export default interfaces;
 
 //*** Flow types
+export type valueDone = { value: mixed, done: boolean};
+
 export type ReadableWritable = {
   readable: ReadableStream,
   writable: WritableStream
@@ -51,4 +53,11 @@ export type ReadableStreamController = {
   close: () => void,
   enqueue: (mixed) => mixed,
   error: (string | Error) => void
+};
+
+export type ReadableStreamReader = {
+  closed: boolean,
+  cancel: (string) => void,
+  read: () => Promise<valueDone>,
+  releaseLock: () => void
 };

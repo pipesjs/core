@@ -8,18 +8,23 @@
 // stream, by waiting for all streams to have pushed a chunk.
 //
 
+import type {
+  valueDone, ReadableStreamReader, ReadableStreamController
+} from "./streams";
+
 import { ReadableStream } from "./streams";
 
-type valueDone = { value: mixed, done: boolean};
-
 // Parses arrays of {value, done} pairs to final pair
-function parseResults (results: Array<valueDone>): valueDone {
+function parseResults (results: Array<?valueDone>): valueDone {
   let
     ended: boolean = false,
     values: Array<mixed> = [];
 
   // Accumulate values
-  for ( let { value, done: boolean } of results ) {
+  for ( let result: ?valueDone of results ) {
+    if ( result == null ) break;
+
+    let { value, done } = result;
     ended = ended || done;
     values.push( value );
   }
@@ -30,12 +35,14 @@ function parseResults (results: Array<valueDone>): valueDone {
   };
 }
 
-export default function merge(...streams) {
-  let readers, chunkWaiters, mergedStream, merger;
+export default function merge(...streams: Array<ReadableStream>): ReadableStream {
+  let readers: Array<ReadableStreamReader>,
+      mergedStream: ReadableStream,
+      merger: (ReadableStreamController) => Promise<?valueDone>;
 
   // Get readers
   try {
-    readers = streams.map( stream => stream.getReader());
+    readers = streams.map( (stream: ReadableStream) => stream.getReader());
 
   // Check for transform streams
   } catch (e) {
@@ -47,15 +54,19 @@ export default function merge(...streams) {
   merger = controller => {
     let
       // Get read promises
-      promises = readers.map( r => r.read() ),
-      merged, push;
+      promises: Array<Promise<?valueDone>> = readers.map( r => r.read() ),
+      merged: Promise<?valueDone>,
+      push;
 
     // Read values and push them onto the stream
-    push = ({ value, done }) => {
+    push = (obj: valueDone): ?valueDone => {
+      let { value, done } = obj;
+
       if ( done )
         return controller.close();
 
       controller.enqueue( value );
+      return obj;
     };
 
     // Combine values into an array
@@ -70,7 +81,7 @@ export default function merge(...streams) {
     start: merger,
     pull: merger,
 
-    cancel () {
+    cancel (): void {
       // If cancelled, cancel all streams
       streams.forEach( stream => stream.cancel() );
     }
