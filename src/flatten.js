@@ -1,19 +1,24 @@
+// @flow
+
 // flatten :: ReadableStream... -> ReadableStream
 // flatten function takes one or more streams
 // and returns a readable combining the streams,
 // returning chunks as they arrive in combined streams.
 //
 
+import type { ReadableStreamController } from "./streams";
+
 import { ReadableStream, WritableStream } from "./streams";
 import { zipWith } from "./utils";
 
-export default function flatten(...streams) {
+export default function flatten(...streams: Array<ReadableStream>): ReadableStream {
   let
-    flattenedStream,
-    writers = [];
+    flattenedStream: ReadableStream,
+    writers: Array<WritableStream> = [];
 
   return flattenedStream = new ReadableStream({
-    start (controller) {
+    start (controller: ReadableStreamController): Promise<mixed> {
+
       // Create writers for each stream
       while ( writers.length < streams.length )
         writers.push( new WritableStream({
@@ -24,8 +29,9 @@ export default function flatten(...streams) {
 
       // Connect streams to writers
       let
-        connect = (r, w) => r.pipeTo( w ),
-        pipedAll;
+        connect: (ReadableStream, WritableStream) => Promise<mixed> =
+          (r, w) => r.pipeTo( w ),
+        pipedAll: Array<Promise<mixed>>;
 
       try {
         pipedAll = zipWith( connect, streams, writers );
@@ -41,14 +47,9 @@ export default function flatten(...streams) {
       );
     },
 
-    cancel () {
+    cancel (): void {
       // If cancelled, cancel all streams
       streams.forEach( stream => stream.cancel() );
     }
   });
 };
-
-// Browserify compat
-if ( typeof module !== "undefined" )
-  module.exports = flatten;
-
