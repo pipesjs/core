@@ -1,3 +1,5 @@
+// @flow
+
 // pipeGen :: Generator Function -> Opts {} -> ReadableWritableBlueprint
 // pipeGen takes a generator function and wraps it into
 // a transform streams. Waits till completion, before enqueuing.
@@ -8,22 +10,36 @@
 // instantiate above streams.
 //
 
+import type { anyFn } from "./utils";
+
+import type {
+  Transformer,
+  TransformInterface,
+  ReadableStrategy,
+  WritableStrategy,
+  ReadableStreamController,
+  WritableStreamWriter
+} from "./streams";
+
 import { ReadableStream, WritableStream } from "./streams";
 import { uuid, events, isFunction } from "./utils";
 
 const
-  readyEvt = uuid(),
-  closedProp = uuid();
+  readyEvt: string = uuid(),
+  closedProp: string = uuid();
 
 // Pump function that runs the generator and adds produced values
 // to the transform stream.
-function pump ( gen, controller, resolve ) {
+function pump (
+    gen: Generator<any, any, any>,
+    controller: ReadableStreamController,
+    resolve: ?anyFn ): ?mixed {
 
   // Clear queue
   events.off( readyEvt );
 
   // Check stream state
-  let backpressure = controller.desiredSize <= 0;
+  let backpressure: boolean = controller.desiredSize <= 0;
 
   // Wait for backpressure to ease
   if ( backpressure ) {
@@ -50,22 +66,28 @@ function pump ( gen, controller, resolve ) {
   return pump( gen, controller, resolve );
 }
 
-export default function pipeGen ( fn, {
+export default function pipeGen ( fn: (mixed) => Generator<any,any,any>, {
+    init, readableStrategy, writableStrategy
+  }: {
   // opts
-    init,
-    readableStrategy,
-    writableStrategy
+    init: ?mixed,
+    readableStrategy: ?ReadableStrategy,
+    writableStrategy: ?WritableStrategy
   }={} ) {
 
-  return class ReadableWritableBlueprint {
+  return class ReadableWritableBlueprint implements TransformInterface {
+    readable: ReadableStream
+    writable: WritableStream
+
     constructor() {
 
       // Init
       let
-        readable, writable,
-        readableReady, readableReady_resolve,
-        readableController,
-        cancelled;
+        readable: ReadableStream,
+        writable: WritableStream,
+        readableReady: Promise<?mixed>,
+        readableReady_resolve: anyFn,
+        readableController: ReadableStreamController;
 
       // create promise that awaits both streams to start
       readableReady = new Promise( resolve => {
@@ -80,7 +102,7 @@ export default function pipeGen ( fn, {
         },
 
         write( chunk, controller ) {
-          let promise, _resolve;
+          let promise: Promise<?mixed>, _resolve: ?anyFn;
 
           promise = new Promise( resolve => {
             _resolve = resolve;
@@ -137,7 +159,7 @@ export default function pipeGen ( fn, {
 
       // If init, push chunk
       if ( init !== void 0 ) {
-        let writer = writable.getWriter();
+        let writer: WritableStreamWriter = writable.getWriter();
         writer.write( init );
 
         // Release lock so other writers can start writing
@@ -145,14 +167,8 @@ export default function pipeGen ( fn, {
       }
 
       // Return { readable, writable } pair
-      Object.assign( this, {
-        readable, writable
-      });
-
+      this.readable = readable;
+      this.writable = writable;
     }
   }
 }
-
-// Browserify compat
-if ( typeof module !== "undefined" )
-  module.exports = pipeGen;

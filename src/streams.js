@@ -64,6 +64,7 @@ export type Transformer = {
 
 //*** Flow interfaces
 export interface ReadableStreamController {
+  [string]: mixed,  // Catch-all (for implementation)
   desiredSize: number,
   close: () => void,
   enqueue: (mixed) => mixed,
