@@ -39,10 +39,36 @@ export default function pipeAsync ( fn: asyncFn, {
     transform ( chunk: mixed, controller: ReadableStreamController ): ?Promise<mixed> {
       // Run async fn
       let
+        future = fn( chunk ),
         condEnqueue = v => {
           if ( v !== void 0 )
             controller.enqueue( v );
-        };
+        },
+
+        // Get index of current future
+        findex: number = transformer._unfulfilledFutures.length;
+
+      // Add to executing futures list
+      transformer._unfulfilledFutures.push( future );
+
+      // Proceed to enqueue
+      future
+        .then( condEnqueue, () => {
+          // Signal error to stream
+          throw new Error
+        })
+
+        // Remove itself from the _unfulfilledFutures list
+        .then( () => transformer._unfulfilledFutures.splice( findex, 1 ) );
+
+      return future;
+    },
+
+    flush ( controller ) {
+      let condEnqueue = v => {
+        if ( v !== void 0 )
+          controller.enqueue( v );
+      };
 
       // Check if anything is left
       Promise.all( transformer._unfulfilledFutures )
