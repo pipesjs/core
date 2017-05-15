@@ -49,16 +49,45 @@ export type ReadableWritable = {
 };
 
 export type Stream = (ReadableStream | WritableStream | ReadableWritable);
-export type ReadableStreamController = {
+
+export type ReadableStrategy = {
+  highWaterMark: number,
+  size: (mixed) => number
+};
+
+export type WritableStrategy = ReadableStrategy;
+
+export type Transformer = {
+  transform: (chunk: mixed, controller: ReadableStreamController) => ?Promise<mixed>,
+  _unfulfilledFutures: Array<Promise<mixed>>
+};
+
+//*** Flow interfaces
+export interface ReadableStreamController {
   desiredSize: number,
   close: () => void,
   enqueue: (mixed) => mixed,
   error: (string | Error) => void
 };
 
-export type ReadableStreamReader = {
-  closed: boolean,
-  cancel: (string) => void,
+export interface ReadableStreamReader {
+  closed: Promise<mixed>,
+  cancel: (string) => ?Promise<mixed>,
   read: () => Promise<valueDone>,
   releaseLock: () => void
+};
+
+export interface WritableStreamWriter {
+  closed: Promise<mixed>,
+  desiredSize: null | number,
+  ready: Promise<mixed>,
+  abort: (string) => ?Promise<mixed>,
+  close: () => Promise<void>,
+  write: (mixed) => Promise<void>,
+  releaseLock: () => void
+};
+
+export interface TransformInterface {
+  readable: ReadableStream,
+  writable: WritableStream
 };
