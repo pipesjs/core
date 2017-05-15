@@ -25,6 +25,10 @@ export default function zip(...streams: Array<ReadableStream>): ReadableStream {
   // Create applier
   applier = new pipe( chunks => {
     let [fn, ...args] = chunks;
+
+    if ( typeof fn !== "function" )
+      throw new Error("Value is not a function");
+
     return fn(...args);
   });
 
