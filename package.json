@@ -11,7 +11,7 @@
         "dist": "npm run bundle && npm run minify",
         "build-all": "npm run build && npm run dist",
         "prepublish": "npm run build-all",
-        "test": "mocha --ui qunit --compilers js:babel-register"
+        "test": "npm run flow && mocha --ui qunit --compilers js:babel-register"
     },
     "repository": {
         "type": "git",

@@ -42,8 +42,3 @@ export default function chain(
     writable
   };
 }
-
-// Browserify compat
-if ( typeof module !== "undefined" )
-  // $FlowFixMe
-  module.exports = chain;

@@ -1,26 +1,40 @@
+// @flow
+
 // connect :: Streams... -> ReadableStream | Promise
 // connect function takes one or more streams
 // and sequentially pipes them to each other,
 // returning the result of the last pipe operation.
 //
 
+import type { ReadableWritable } from "./streams";
+import { ReadableStream, WritableStream } from "./streams";
+
 import { isTransform, isWritable } from "./utils";
 
-export default function connect(origin, ...streams) {
+export default function connect(
+    origin: ReadableStream | ReadableWritable,
+    ...streams: Array<WritableStream | ReadableWritable>
+): ReadableStream | Promise<mixed> {
+
   // Check origin
   if ( !origin )
     throw new Error("No streams passed");
 
-  let sink, end;
+  let sink: WritableStream | ReadableStream,
+      end: ReadableStream;
 
   // Get the last stream
   sink = streams.pop();
 
   // if origin is a transform$, take it's readable part
-  end = origin.readable || origin;
+  if ( origin instanceof ReadableStream ) {
+    end = origin;
+  } else {
+    end = origin.readable;
+  }
 
   // Connect the streams
-  for ( let stream of streams ) {
+  for ( let stream: ReadableWritable of streams ) {
 
     // Check for transform streams
     if ( !isTransform( stream ))
@@ -43,8 +57,3 @@ export default function connect(origin, ...streams) {
   // Return result
   return end;
 }
-
-// Browserify compat
-if ( typeof module !== "undefined" )
-  module.exports = connect;
-
