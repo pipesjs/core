@@ -31,13 +31,6 @@ if ( !!global.ReadableStream ) {
   }
 }
 
-export type ReadableStreamController = {
-  desiredSize: number,
-  close: () => void,
-  enqueue: (mixed) => mixed,
-  error: (string | Error) => void
-};
-
 export const
   ReadableStream = interfaces.ReadableStream,
   WritableStream = interfaces.WritableStream,
@@ -46,3 +39,16 @@ export const
   TransformStream = interfaces.TransformStream;
 
 export default interfaces;
+
+//*** Flow types
+export type ReadableWritable = {
+  readable: ReadableStream,
+  writable: WritableStream
+};
+
+export type ReadableStreamController = {
+  desiredSize: number,
+  close: () => void,
+  enqueue: (mixed) => mixed,
+  error: (string | Error) => void
+};

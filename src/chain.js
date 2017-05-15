@@ -1,3 +1,5 @@
+// @flow
+
 // chain :: TransformStreams... -> { readable, writable }
 // chain function takes one or more
 // transform streams / { readable, writable } pairs
@@ -7,15 +9,19 @@
 // compatible with `ReadableStream::pipeThrough`
 //
 
+import type { ReadableWritable } from "./streams";
+
 import connect from "./connect";
 import { isTransform, isReadable } from "./utils";
 
 const
-  compatibilityError = `
+  compatibilityError: string = `
     Only transform streams and readable-writable pairs can be chained
   `;
 
-export default function chain(origin, ...streams) {
+export default function chain(
+    origin: ReadableWritable, ...streams: Array<ReadableWritable>
+): ReadableWritable {
 
   // Check that origin is a transform stream / { readable, writable }
   if ( !isTransform( origin ))
@@ -39,4 +45,5 @@ export default function chain(origin, ...streams) {
 
 // Browserify compat
 if ( typeof module !== "undefined" )
+  // $FlowFixMe
   module.exports = chain;
