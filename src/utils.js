@@ -4,7 +4,8 @@ import type { Stream, ReadableWritable } from "./streams";
 import { ReadableStream, WritableStream } from "./streams";
 
 // Events
-type anyFn = (...vals: Array<mixed>) => mixed;
+export type anyFn = (...vals: Array<mixed>) => mixed;
+export type asyncFn = (...vals: Array<mixed>) => Promise<mixed>;
 
 export class Events {
   _events: { [string]: Array<anyFn> }
