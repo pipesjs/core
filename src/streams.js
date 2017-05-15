@@ -48,6 +48,7 @@ export type ReadableWritable = {
   writable: WritableStream
 };
 
+export type Stream = (ReadableStream | WritableStream | ReadableWritable);
 export type ReadableStreamController = {
   desiredSize: number,
   close: () => void,
