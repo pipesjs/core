@@ -1,3 +1,5 @@
+// @flow
+
 // split :: ReadableStream -> Int -> [ReadableStream]
 // split function takes a readable stream and number
 // and returns an array of tee'd readable streams,
@@ -5,20 +7,27 @@
 // streams and hence the original stream.
 //
 
-export default function split( stream, parts=2 ) {
+import { ReadableStream } from "./streams";
+
+export default function split(
+  stream: ReadableStream, parts: number = 2
+): Array<ReadableStream> {
+
   // Check for readable stream
   if ( !stream.tee )
     throw new Error("Only readable streams can be split");
 
   // Decls
-  let result, cancelFns, cancelAll;
+  let result: Array<ReadableStream>,
+      cancelFns: Array<(?string) => void>,
+      cancelAll: () => void;
 
   // Generate parts
   result = [stream];
 
   while ( parts > result.length ) {
     // Take last part
-    let s = result.pop();
+    let s: ReadableStream = result.pop();
 
     // Add new parts after tee'ing
     result = result.concat( s.tee() );
@@ -37,7 +46,3 @@ export default function split( stream, parts=2 ) {
 
   return result;
 }
-
-// Browserify compat
-if ( typeof module !== "undefined" )
-  module.exports = split;
