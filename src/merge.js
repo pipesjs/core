@@ -1,3 +1,5 @@
+// @flow
+
 // merge :: ReadableStream... -> ReadableStream
 // merge function takes one or more streams
 // and returns a readable combining the streams,
@@ -8,14 +10,16 @@
 
 import { ReadableStream } from "./streams";
 
+type valueDone = { value: mixed, done: boolean};
+
 // Parses arrays of {value, done} pairs to final pair
-function parseResults (results) {
+function parseResults (results: Array<valueDone>): valueDone {
   let
-    ended = false,
-    values = [];
+    ended: boolean = false,
+    values: Array<mixed> = [];
 
   // Accumulate values
-  for ( let { value, done } of results ) {
+  for ( let { value, done: boolean } of results ) {
     ended = ended || done;
     values.push( value );
   }
@@ -72,8 +76,3 @@ export default function merge(...streams) {
     }
   });
 };
-
-// Browserify compat
-if ( typeof module !== "undefined" )
-  module.exports = merge;
-
