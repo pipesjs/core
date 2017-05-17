@@ -1,24 +1,5 @@
 // @flow
 
-// accumulate :: Function -> InitValue -> ReadableWritableBlueprint
-// accumulate function takes a reducer function,
-// and an optional inital value.
-//
-// Returns a ReadableWritableBlueprint that consumes piped
-// stream, combining the values with the reducer
-// and enqueues the result.
-//
-// reducer :: PrevValue -> CurrValue -> NextValue
-// reducer function gets:
-//
-// PrevValue: the previous value or InitValue (if supplied)
-// CurrValue: the current value being processed.
-//
-// that returns NextValue which in turn becomes PrevValue
-// for the next iteration until the input stream is
-// entirely consumed.
-//
-
 import type { ReadableStreamController } from "./streams";
 import {
     ReadableStream, WritableStream
@@ -31,6 +12,14 @@ const
     accumulate takes a reducing function
   `;
 
+/**
+ * This function takes a reducer function and an optional initial value and
+ * returns a transformstream that accumulates the values of any stream piped to it.
+ *
+ * @param {function} reducer a function that takes sequential values and reduces them
+ * @returns {TransformStream} a ReadableWritable that consumes piped
+ * stream, combining the values with the reducer and enqueues the result.
+ */
 export default function accumulate(reducer: (mixed, mixed) => mixed, init: ?mixed) {
   // check if reducer is a function
   if ( !isFunction( reducer ))
