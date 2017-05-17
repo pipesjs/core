@@ -9,7 +9,9 @@ var _streams = require("./streams");
 
 var _utils = require("./utils");
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } // pipeGen :: Generator Function -> Opts {} -> ReadableWritableBlueprint
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// pipeGen :: Generator Function -> Opts {} -> ReadableWritableBlueprint
 // pipeGen takes a generator function and wraps it into
 // a transform streams. Waits till completion, before enqueuing.
 // All yields are enqueued, back-pressure is respected and
@@ -72,8 +74,7 @@ function pipeGen(fn) {
         writable = void 0,
         readableReady = void 0,
         readableReady_resolve = void 0,
-        readableController = void 0,
-        cancelled = void 0;
+        readableController = void 0;
 
     // create promise that awaits both streams to start
     readableReady = new Promise(function (resolve) {
@@ -147,11 +148,7 @@ function pipeGen(fn) {
     }
 
     // Return { readable, writable } pair
-    Object.assign(this, {
-      readable: readable, writable: writable
-    });
+    this.readable = readable;
+    this.writable = writable;
   };
 }
-
-// Browserify compat
-if (typeof module !== "undefined") module.exports = pipeGen;

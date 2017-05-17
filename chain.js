@@ -13,6 +13,8 @@ var _utils = require("./utils");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var compatibilityError = "\n    Only transform streams and readable-writable pairs can be chained\n  ";
+
 // chain :: TransformStreams... -> { readable, writable }
 // chain function takes one or more
 // transform streams / { readable, writable } pairs
@@ -21,8 +23,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // returns the { readable, writable } pair that is
 // compatible with `ReadableStream::pipeThrough`
 //
-
-var compatibilityError = "\n    Only transform streams and readable-writable pairs can be chained\n  ";
 
 function chain(origin) {
 
@@ -47,6 +47,3 @@ function chain(origin) {
     writable: writable
   };
 }
-
-// Browserify compat
-if (typeof module !== "undefined") module.exports = chain;

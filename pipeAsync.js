@@ -11,7 +11,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // pipeAsync :: Async Function -> Opts {} -> TransformBlueprint
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+// pipeAsync :: Async Function -> Opts {} -> TransformBlueprint
 // pipeAsync takes an async function and wraps it into
 // a transform streams. Waits till completion, before enqueuing.
 //
@@ -33,18 +35,17 @@ function pipeAsync(fn) {
     // Run function and enqueue result
     transform: function transform(chunk, controller) {
       // Run async fn
-      var self = transformer,
-          future = fn(chunk),
+      var future = fn(chunk),
           condEnqueue = function condEnqueue(v) {
         if (v !== void 0) controller.enqueue(v);
       },
 
 
       // Get index of current future
-      findex = self._unfulfilledFutures.length;
+      findex = transformer._unfulfilledFutures.length;
 
       // Add to executing futures list
-      self._unfulfilledFutures.push(future);
+      transformer._unfulfilledFutures.push(future);
 
       // Proceed to enqueue
       future.then(condEnqueue, function () {
@@ -54,19 +55,18 @@ function pipeAsync(fn) {
 
       // Remove itself from the _unfulfilledFutures list
       .then(function () {
-        return self._unfulfilledFutures.splice(findex, 1);
+        return transformer._unfulfilledFutures.splice(findex, 1);
       });
 
       return future;
     },
     flush: function flush(controller) {
-      var self = transformer,
-          condEnqueue = function condEnqueue(v) {
+      var condEnqueue = function condEnqueue(v) {
         if (v !== void 0) controller.enqueue(v);
       };
 
       // Check if anything is left
-      Promise.all(self._unfulfilledFutures).then(function (vs) {
+      Promise.all(transformer._unfulfilledFutures).then(function (vs) {
         return vs.map(condEnqueue);
       });
     },
@@ -111,6 +111,3 @@ function pipeAsync(fn) {
 
   if (this instanceof pipeAsync) return new TransformBlueprint();else return TransformBlueprint;
 }
-
-// Browserify compat
-if (typeof module !== "undefined") module.exports = pipeAsync;

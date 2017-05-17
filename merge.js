@@ -8,6 +8,16 @@ exports.default = merge;
 var _streams = require("./streams");
 
 // Parses arrays of {value, done} pairs to final pair
+
+
+// merge :: ReadableStream... -> ReadableStream
+// merge function takes one or more streams
+// and returns a readable combining the streams,
+// such that it gathers chunks from all streams
+// into an array and then pushes them onto the combined
+// stream, by waiting for all streams to have pushed a chunk.
+//
+
 function parseResults(results) {
   var ended = false,
       values = [];
@@ -19,9 +29,12 @@ function parseResults(results) {
 
   try {
     for (var _iterator = results[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      var _ref2 = _step.value;
-      var value = _ref2.value,
-          done = _ref2.done;
+      var result = _step.value;
+
+      if (result == null) break;
+
+      var value = result.value,
+          done = result.done;
 
       ended = ended || done;
       values.push(value);
@@ -45,13 +58,7 @@ function parseResults(results) {
     value: values,
     done: ended
   };
-} // merge :: ReadableStream... -> ReadableStream
-// merge function takes one or more streams
-// and returns a readable combining the streams,
-// such that it gathers chunks from all streams
-// into an array and then pushes them onto the combined
-// stream, by waiting for all streams to have pushed a chunk.
-//
+}
 
 function merge() {
   for (var _len = arguments.length, streams = Array(_len), _key = 0; _key < _len; _key++) {
@@ -59,7 +66,6 @@ function merge() {
   }
 
   var readers = void 0,
-      chunkWaiters = void 0,
       mergedStream = void 0,
       merger = void 0;
 
@@ -86,13 +92,15 @@ function merge() {
         push = void 0;
 
     // Read values and push them onto the stream
-    push = function push(_ref3) {
-      var value = _ref3.value,
-          done = _ref3.done;
+    push = function push(obj) {
+      var value = obj.value,
+          done = obj.done;
+
 
       if (done) return controller.close();
 
       controller.enqueue(value);
+      return obj;
     };
 
     // Combine values into an array
@@ -113,6 +121,3 @@ function merge() {
     }
   });
 };
-
-// Browserify compat
-if (typeof module !== "undefined") module.exports = merge;

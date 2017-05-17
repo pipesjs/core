@@ -3,10 +3,14 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+
 // Access stream interface
 
 var interfaces = void 0,
-    global = global || {};
+
+// $FlowFixMe
+global = global || {};
 
 if (typeof window !== 'undefined') global = window;
 
@@ -37,3 +41,16 @@ var ReadableStream = exports.ReadableStream = interfaces.ReadableStream,
     TransformStream = exports.TransformStream = interfaces.TransformStream;
 
 exports.default = interfaces;
+
+//*** Flow types
+
+
+//*** Flow interfaces
+
+;
+
+;
+
+;
+
+;

@@ -3,11 +3,14 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.isGeneratorFn = exports.isGenerator = exports.isFunction = exports.isWritable = exports.isReadable = exports.isTransform = exports.events = exports.Events = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 exports.zipWith = zipWith;
 exports.uuid = uuid;
+
+var _streams = require("./streams");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -57,16 +60,16 @@ var events = exports.events = new Events(),
   return s && s.writable && s.readable;
 },
     isReadable = exports.isReadable = function isReadable(s) {
-  return s && s.pipeThrough;
+  return s instanceof _streams.ReadableStream && s.pipeThrough;
 },
     isWritable = exports.isWritable = function isWritable(s) {
-  return s && s.getWriter;
+  return s instanceof _streams.WritableStream && s.getWriter;
 },
 
 
 // Inspired by code from @tj/co library
 isFunction = exports.isFunction = function isFunction(f) {
-  return f && typeof f === "function";
+  return typeof f === "function";
 },
     isGenerator = exports.isGenerator = function isGenerator(o) {
   return o && isFunction(o.next);
@@ -79,6 +82,7 @@ isFunction = exports.isFunction = function isFunction(f) {
 
 // Zips together two arrays using given fn
 function zipWith(fn, arr1, arr2) {
+
   var res = [];
 
   // Pop values, push zipped values
@@ -90,5 +94,6 @@ function zipWith(fn, arr1, arr2) {
 // Generate uuids
 // From: https://gist.github.com/jed/982883
 function uuid(a) {
+  // $FlowFixMe
   return a ? (a ^ Math.random() * 16 >> a / 4).toString(16) : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, uuid);
 }

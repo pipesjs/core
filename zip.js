@@ -5,6 +5,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = zip;
 
+var _streams = require("./streams");
+
 var _merge = require("./merge");
 
 var _merge2 = _interopRequireDefault(_merge);
@@ -17,7 +19,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); } // zip :: ReadableStream... -> ReadableStream
+function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
+
+// zip :: ReadableStream... -> ReadableStream
 // zip function takes one or more streams
 // and returns a readable combining the streams,
 // such that it gathers chunks from all streams
@@ -34,17 +38,16 @@ function zip() {
   merged = _merge2.default.apply(undefined, arguments);
 
   // Create applier
-  applier = (0, _pipe2.default)(function (chunks) {
+  applier = new _pipe2.default(function (chunks) {
     var _chunks = _toArray(chunks),
         fn = _chunks[0],
         args = _chunks.slice(1);
+
+    if (typeof fn !== "function") throw new Error("Value is not a function");
 
     return fn.apply(undefined, _toConsumableArray(args));
   });
 
   // return zipped stream
-  return merged.pipeThrough(new applier());
+  return merged.pipeThrough(applier);
 }
-
-// Browserify compat
-if (typeof module !== "undefined") module.exports = zip;

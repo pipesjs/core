@@ -5,9 +5,12 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = connect;
 
+var _streams = require("./streams");
+
 var _utils = require("./utils");
 
 function connect(origin) {
+
   // Check origin
   if (!origin) throw new Error("No streams passed");
 
@@ -23,7 +26,11 @@ function connect(origin) {
   sink = streams.pop();
 
   // if origin is a transform$, take it's readable part
-  end = origin.readable || origin;
+  if (origin instanceof _streams.ReadableStream) {
+    end = origin;
+  } else {
+    end = origin.readable;
+  }
 
   // Connect the streams
   var _iteratorNormalCompletion = true;
@@ -64,11 +71,8 @@ function connect(origin) {
   return end;
 }
 
-// Browserify compat
 // connect :: Streams... -> ReadableStream | Promise
 // connect function takes one or more streams
 // and sequentially pipes them to each other,
 // returning the result of the last pipe operation.
 //
-
-if (typeof module !== "undefined") module.exports = connect;

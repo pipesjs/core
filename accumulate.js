@@ -9,7 +9,9 @@ var _streams = require("./streams");
 
 var _utils = require("./utils");
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } // accumulate :: Function -> InitValue -> ReadableWritableBlueprint
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// accumulate :: Function -> InitValue -> ReadableWritableBlueprint
 // accumulate function takes a reducer function,
 // and an optional inital value.
 //
@@ -44,7 +46,7 @@ function accumulate(reducer, init) {
         done = void 0,
         resolved = void 0,
         rejected = void 0,
-        cancelled = void 0;
+        cancelled = false;
 
     // Create done promise
     done = new Promise(function (resolve, reject) {
@@ -95,7 +97,7 @@ function accumulate(reducer, init) {
         cancelled = true;
 
         // Close writable
-        writable.close();
+        writable && writable.close();
 
         // Resolve promise
         resolved(reason);
@@ -115,4 +117,6 @@ function accumulate(reducer, init) {
 }
 
 // Browserify compat
-if (typeof module !== "undefined") module.exports = accumulate;
+if (typeof module !== "undefined")
+  // $FlowFixMe
+  module.exports = accumulate;

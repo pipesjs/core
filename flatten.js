@@ -9,12 +9,6 @@ var _streams = require("./streams");
 
 var _utils = require("./utils");
 
-// flatten :: ReadableStream... -> ReadableStream
-// flatten function takes one or more streams
-// and returns a readable combining the streams,
-// returning chunks as they arrive in combined streams.
-//
-
 function flatten() {
   for (var _len = arguments.length, streams = Array(_len), _key = 0; _key < _len; _key++) {
     streams[_key] = arguments[_key];
@@ -25,6 +19,7 @@ function flatten() {
 
   return flattenedStream = new _streams.ReadableStream({
     start: function start(controller) {
+
       // Create writers for each stream
       while (writers.length < streams.length) {
         writers.push(new _streams.WritableStream({
@@ -53,7 +48,12 @@ function flatten() {
       });
     }
   });
-};
+}
 
-// Browserify compat
-if (typeof module !== "undefined") module.exports = flatten;
+// flatten :: ReadableStream... -> ReadableStream
+// flatten function takes one or more streams
+// and returns a readable combining the streams,
+// returning chunks as they arrive in combined streams.
+//
+
+;

@@ -10,7 +10,9 @@ var _streams = require("./streams");
 
 var _utils = require("./utils");
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } // accumulate :: Function -> InitValue -> ReadableWritableBlueprint
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// accumulate :: Function -> InitValue -> ReadableWritableBlueprint
 // accumulate function takes a reducer function,
 // and an optional inital value.
 //
@@ -45,7 +47,7 @@ function accumulate(reducer, init) {
         done = void 0,
         resolved = void 0,
         rejected = void 0,
-        cancelled = void 0;
+        cancelled = false;
 
     // Create done promise
     done = new Promise(function (resolve, reject) {
@@ -96,7 +98,7 @@ function accumulate(reducer, init) {
         cancelled = true;
 
         // Close writable
-        writable.close();
+        writable && writable.close();
 
         // Resolve promise
         resolved(reason);
@@ -116,7 +118,9 @@ function accumulate(reducer, init) {
 }
 
 // Browserify compat
-if (typeof module !== "undefined") module.exports = accumulate;
+if (typeof module !== "undefined")
+  // $FlowFixMe
+  module.exports = accumulate;
 },{"./streams":12,"./utils":13}],2:[function(require,module,exports){
 "use strict";
 
@@ -133,6 +137,8 @@ var _utils = require("./utils");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var compatibilityError = "\n    Only transform streams and readable-writable pairs can be chained\n  ";
+
 // chain :: TransformStreams... -> { readable, writable }
 // chain function takes one or more
 // transform streams / { readable, writable } pairs
@@ -141,8 +147,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // returns the { readable, writable } pair that is
 // compatible with `ReadableStream::pipeThrough`
 //
-
-var compatibilityError = "\n    Only transform streams and readable-writable pairs can be chained\n  ";
 
 function chain(origin) {
 
@@ -167,9 +171,6 @@ function chain(origin) {
     writable: writable
   };
 }
-
-// Browserify compat
-if (typeof module !== "undefined") module.exports = chain;
 },{"./connect":3,"./utils":13}],3:[function(require,module,exports){
 "use strict";
 
@@ -178,9 +179,12 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = connect;
 
+var _streams = require("./streams");
+
 var _utils = require("./utils");
 
 function connect(origin) {
+
   // Check origin
   if (!origin) throw new Error("No streams passed");
 
@@ -196,7 +200,11 @@ function connect(origin) {
   sink = streams.pop();
 
   // if origin is a transform$, take it's readable part
-  end = origin.readable || origin;
+  if (origin instanceof _streams.ReadableStream) {
+    end = origin;
+  } else {
+    end = origin.readable;
+  }
 
   // Connect the streams
   var _iteratorNormalCompletion = true;
@@ -237,15 +245,12 @@ function connect(origin) {
   return end;
 }
 
-// Browserify compat
 // connect :: Streams... -> ReadableStream | Promise
 // connect function takes one or more streams
 // and sequentially pipes them to each other,
 // returning the result of the last pipe operation.
 //
-
-if (typeof module !== "undefined") module.exports = connect;
-},{"./utils":13}],4:[function(require,module,exports){
+},{"./streams":12,"./utils":13}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -257,12 +262,6 @@ var _streams = require("./streams");
 
 var _utils = require("./utils");
 
-// flatten :: ReadableStream... -> ReadableStream
-// flatten function takes one or more streams
-// and returns a readable combining the streams,
-// returning chunks as they arrive in combined streams.
-//
-
 function flatten() {
   for (var _len = arguments.length, streams = Array(_len), _key = 0; _key < _len; _key++) {
     streams[_key] = arguments[_key];
@@ -273,6 +272,7 @@ function flatten() {
 
   return flattenedStream = new _streams.ReadableStream({
     start: function start(controller) {
+
       // Create writers for each stream
       while (writers.length < streams.length) {
         writers.push(new _streams.WritableStream({
@@ -301,10 +301,15 @@ function flatten() {
       });
     }
   });
-};
+}
 
-// Browserify compat
-if (typeof module !== "undefined") module.exports = flatten;
+// flatten :: ReadableStream... -> ReadableStream
+// flatten function takes one or more streams
+// and returns a readable combining the streams,
+// returning chunks as they arrive in combined streams.
+//
+
+;
 },{"./streams":12,"./utils":13}],5:[function(require,module,exports){
 "use strict";
 
@@ -381,6 +386,16 @@ exports.default = merge;
 var _streams = require("./streams");
 
 // Parses arrays of {value, done} pairs to final pair
+
+
+// merge :: ReadableStream... -> ReadableStream
+// merge function takes one or more streams
+// and returns a readable combining the streams,
+// such that it gathers chunks from all streams
+// into an array and then pushes them onto the combined
+// stream, by waiting for all streams to have pushed a chunk.
+//
+
 function parseResults(results) {
   var ended = false,
       values = [];
@@ -392,9 +407,12 @@ function parseResults(results) {
 
   try {
     for (var _iterator = results[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      var _ref2 = _step.value;
-      var value = _ref2.value,
-          done = _ref2.done;
+      var result = _step.value;
+
+      if (result == null) break;
+
+      var value = result.value,
+          done = result.done;
 
       ended = ended || done;
       values.push(value);
@@ -418,13 +436,7 @@ function parseResults(results) {
     value: values,
     done: ended
   };
-} // merge :: ReadableStream... -> ReadableStream
-// merge function takes one or more streams
-// and returns a readable combining the streams,
-// such that it gathers chunks from all streams
-// into an array and then pushes them onto the combined
-// stream, by waiting for all streams to have pushed a chunk.
-//
+}
 
 function merge() {
   for (var _len = arguments.length, streams = Array(_len), _key = 0; _key < _len; _key++) {
@@ -432,7 +444,6 @@ function merge() {
   }
 
   var readers = void 0,
-      chunkWaiters = void 0,
       mergedStream = void 0,
       merger = void 0;
 
@@ -459,13 +470,15 @@ function merge() {
         push = void 0;
 
     // Read values and push them onto the stream
-    push = function push(_ref3) {
-      var value = _ref3.value,
-          done = _ref3.done;
+    push = function push(obj) {
+      var value = obj.value,
+          done = obj.done;
+
 
       if (done) return controller.close();
 
       controller.enqueue(value);
+      return obj;
     };
 
     // Combine values into an array
@@ -486,9 +499,6 @@ function merge() {
     }
   });
 };
-
-// Browserify compat
-if (typeof module !== "undefined") module.exports = merge;
 },{"./streams":12}],7:[function(require,module,exports){
 "use strict";
 
@@ -549,7 +559,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // pipeAsync :: Async Function -> Opts {} -> TransformBlueprint
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+// pipeAsync :: Async Function -> Opts {} -> TransformBlueprint
 // pipeAsync takes an async function and wraps it into
 // a transform streams. Waits till completion, before enqueuing.
 //
@@ -571,18 +583,17 @@ function pipeAsync(fn) {
     // Run function and enqueue result
     transform: function transform(chunk, controller) {
       // Run async fn
-      var self = transformer,
-          future = fn(chunk),
+      var future = fn(chunk),
           condEnqueue = function condEnqueue(v) {
         if (v !== void 0) controller.enqueue(v);
       },
 
 
       // Get index of current future
-      findex = self._unfulfilledFutures.length;
+      findex = transformer._unfulfilledFutures.length;
 
       // Add to executing futures list
-      self._unfulfilledFutures.push(future);
+      transformer._unfulfilledFutures.push(future);
 
       // Proceed to enqueue
       future.then(condEnqueue, function () {
@@ -592,19 +603,18 @@ function pipeAsync(fn) {
 
       // Remove itself from the _unfulfilledFutures list
       .then(function () {
-        return self._unfulfilledFutures.splice(findex, 1);
+        return transformer._unfulfilledFutures.splice(findex, 1);
       });
 
       return future;
     },
     flush: function flush(controller) {
-      var self = transformer,
-          condEnqueue = function condEnqueue(v) {
+      var condEnqueue = function condEnqueue(v) {
         if (v !== void 0) controller.enqueue(v);
       };
 
       // Check if anything is left
-      Promise.all(self._unfulfilledFutures).then(function (vs) {
+      Promise.all(transformer._unfulfilledFutures).then(function (vs) {
         return vs.map(condEnqueue);
       });
     },
@@ -649,9 +659,6 @@ function pipeAsync(fn) {
 
   if (this instanceof pipeAsync) return new TransformBlueprint();else return TransformBlueprint;
 }
-
-// Browserify compat
-if (typeof module !== "undefined") module.exports = pipeAsync;
 },{"./streams":12}],9:[function(require,module,exports){
 "use strict";
 
@@ -666,7 +673,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // pipeFn :: Function -> Opts {} -> TransformBlueprint
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+// pipeFn :: Function -> Opts {} -> TransformBlueprint
 // pipeFn takes a function and wraps it into
 // a transform streams.
 // Returns a blueprint class that can be used to
@@ -681,6 +690,7 @@ function pipeFn(fn) {
 
   // Prepare transformer
   var transformer = {
+    _unfulfilledFutures: [],
     // Run function and enqueue result
     transform: function transform(chunk, controller) {
       var v = fn(chunk);
@@ -725,9 +735,6 @@ function pipeFn(fn) {
 
   return TransformBlueprint;
 }
-
-// Browserify compat
-if (typeof module !== "undefined") module.exports = pipeFn;
 },{"./streams":12}],10:[function(require,module,exports){
 "use strict";
 
@@ -740,7 +747,9 @@ var _streams = require("./streams");
 
 var _utils = require("./utils");
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } // pipeGen :: Generator Function -> Opts {} -> ReadableWritableBlueprint
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// pipeGen :: Generator Function -> Opts {} -> ReadableWritableBlueprint
 // pipeGen takes a generator function and wraps it into
 // a transform streams. Waits till completion, before enqueuing.
 // All yields are enqueued, back-pressure is respected and
@@ -803,8 +812,7 @@ function pipeGen(fn) {
         writable = void 0,
         readableReady = void 0,
         readableReady_resolve = void 0,
-        readableController = void 0,
-        cancelled = void 0;
+        readableController = void 0;
 
     // create promise that awaits both streams to start
     readableReady = new Promise(function (resolve) {
@@ -878,14 +886,10 @@ function pipeGen(fn) {
     }
 
     // Return { readable, writable } pair
-    Object.assign(this, {
-      readable: readable, writable: writable
-    });
+    this.readable = readable;
+    this.writable = writable;
   };
 }
-
-// Browserify compat
-if (typeof module !== "undefined") module.exports = pipeGen;
 },{"./streams":12,"./utils":13}],11:[function(require,module,exports){
 "use strict";
 
@@ -893,15 +897,12 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = split;
-// split :: ReadableStream -> Int -> [ReadableStream]
-// split function takes a readable stream and number
-// and returns an array of tee'd readable streams,
-// with a `cancelAll` function that cancels all the tee'd
-// streams and hence the original stream.
-//
+
+var _streams = require("./streams");
 
 function split(stream) {
   var parts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
+
 
   // Check for readable stream
   if (!stream.tee) throw new Error("Only readable streams can be split");
@@ -942,18 +943,26 @@ function split(stream) {
   return result;
 }
 
-// Browserify compat
-if (typeof module !== "undefined") module.exports = split;
-},{}],12:[function(require,module,exports){
+// split :: ReadableStream -> Int -> [ReadableStream]
+// split function takes a readable stream and number
+// and returns an array of tee'd readable streams,
+// with a `cancelAll` function that cancels all the tee'd
+// streams and hence the original stream.
+//
+},{"./streams":12}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+
 // Access stream interface
 
 var interfaces = void 0,
-    global = global || {};
+
+// $FlowFixMe
+global = global || {};
 
 if (typeof window !== 'undefined') global = window;
 
@@ -984,17 +993,33 @@ var ReadableStream = exports.ReadableStream = interfaces.ReadableStream,
     TransformStream = exports.TransformStream = interfaces.TransformStream;
 
 exports.default = interfaces;
+
+//*** Flow types
+
+
+//*** Flow interfaces
+
+;
+
+;
+
+;
+
+;
 },{"web-streams-polyfill":"web-streams-polyfill"}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.isGeneratorFn = exports.isGenerator = exports.isFunction = exports.isWritable = exports.isReadable = exports.isTransform = exports.events = exports.Events = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 exports.zipWith = zipWith;
 exports.uuid = uuid;
+
+var _streams = require("./streams");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1044,16 +1069,16 @@ var events = exports.events = new Events(),
   return s && s.writable && s.readable;
 },
     isReadable = exports.isReadable = function isReadable(s) {
-  return s && s.pipeThrough;
+  return s instanceof _streams.ReadableStream && s.pipeThrough;
 },
     isWritable = exports.isWritable = function isWritable(s) {
-  return s && s.getWriter;
+  return s instanceof _streams.WritableStream && s.getWriter;
 },
 
 
 // Inspired by code from @tj/co library
 isFunction = exports.isFunction = function isFunction(f) {
-  return f && typeof f === "function";
+  return typeof f === "function";
 },
     isGenerator = exports.isGenerator = function isGenerator(o) {
   return o && isFunction(o.next);
@@ -1066,6 +1091,7 @@ isFunction = exports.isFunction = function isFunction(f) {
 
 // Zips together two arrays using given fn
 function zipWith(fn, arr1, arr2) {
+
   var res = [];
 
   // Pop values, push zipped values
@@ -1077,6 +1103,7 @@ function zipWith(fn, arr1, arr2) {
 // Generate uuids
 // From: https://gist.github.com/jed/982883
 function uuid(a) {
+  // $FlowFixMe
   return a ? (a ^ Math.random() * 16 >> a / 4).toString(16) : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, uuid);
 }
-},{}]},{},[5]);
+},{"./streams":12}]},{},[5]);

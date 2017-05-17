@@ -4,15 +4,12 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = split;
-// split :: ReadableStream -> Int -> [ReadableStream]
-// split function takes a readable stream and number
-// and returns an array of tee'd readable streams,
-// with a `cancelAll` function that cancels all the tee'd
-// streams and hence the original stream.
-//
+
+var _streams = require("./streams");
 
 function split(stream) {
   var parts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
+
 
   // Check for readable stream
   if (!stream.tee) throw new Error("Only readable streams can be split");
@@ -53,5 +50,9 @@ function split(stream) {
   return result;
 }
 
-// Browserify compat
-if (typeof module !== "undefined") module.exports = split;
+// split :: ReadableStream -> Int -> [ReadableStream]
+// split function takes a readable stream and number
+// and returns an array of tee'd readable streams,
+// with a `cancelAll` function that cancels all the tee'd
+// streams and hence the original stream.
+//
