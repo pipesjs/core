@@ -1,6 +1,3 @@
-Installing
-----------
-
 ### For browsers
 
 The library depends on a [polyfill](https://github.com/creatorrr/web-stream-polyfill) for browsers that don't support `Stream` APIs yet (which as of now, is all of them), so make sure you include it in before including the library.

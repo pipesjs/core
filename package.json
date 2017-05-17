@@ -7,9 +7,10 @@
     "build": "babel src -d .",
     "bundle": "browserify --external web-streams-polyfill index.js > dist/pipes.core.js",
     "flow": "flow",
+    "docs": "documentation build --config documentation.yml src/index.js -f md > README.md",
     "minify": "uglifyjs dist/pipes.core.js -o dist/pipes.core.min.js -c",
     "dist": "npm run bundle && npm run minify",
-    "build-all": "npm run build && npm run dist",
+    "build-all": "npm run docs && npm run build && npm run dist",
     "prepublish": "npm run build-all",
     "test": "npm run flow && mocha --ui qunit --compilers js:babel-register"
   },
