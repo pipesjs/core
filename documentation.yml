@@ -1,0 +1,7 @@
+toc:
+  - name: pipes/core
+    file: docs/snippets/intro.md
+  - name: About
+    file: docs/snippets/about.md
+  - name: Installing
+    file: docs/snippets/installing.md
