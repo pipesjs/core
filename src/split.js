@@ -1,14 +1,12 @@
 // @flow
 
-// split :: ReadableStream -> Int -> [ReadableStream]
-// split function takes a readable stream and number
-// and returns an array of tee'd readable streams,
-// with a `cancelAll` function that cancels all the tee'd
-// streams and hence the original stream.
-//
-
 import { ReadableStream } from "./streams";
 
+/**
+ * This function takes a readable stream and a number and returns an array of
+ * tee'd readable streams, with a `cancelAll` function that cancels all the tee'd
+ * streams and in turn the original stream.
+ */
 export default function split(
   stream: ReadableStream, parts: number = 2
 ): Array<ReadableStream> {

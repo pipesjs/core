@@ -1,16 +1,14 @@
 // @flow
 
-// flatten :: ReadableStream... -> ReadableStream
-// flatten function takes one or more streams
-// and returns a readable combining the streams,
-// returning chunks as they arrive in combined streams.
-//
-
 import type { ReadableStreamController } from "./streams";
 
 import { ReadableStream, WritableStream } from "./streams";
 import { zipWith } from "./utils";
 
+/**
+ * This function takes one or more streams and returns a readable combining
+ * the streams, returning chunks as they arrive in combined streams.
+ */
 export default function flatten(...streams: Array<ReadableStream>): ReadableStream {
   let
     flattenedStream: ReadableStream,

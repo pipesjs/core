@@ -1,13 +1,5 @@
 // @flow
 
-// merge :: ReadableStream... -> ReadableStream
-// merge function takes one or more streams
-// and returns a readable combining the streams,
-// such that it gathers chunks from all streams
-// into an array and then pushes them onto the combined
-// stream, by waiting for all streams to have pushed a chunk.
-//
-
 import type {
   valueDone, ReadableStreamReader, ReadableStreamController
 } from "./streams";
@@ -34,6 +26,13 @@ function parseResults (results: Array<?valueDone>): valueDone {
     done: ended
   };
 }
+
+/**
+ * This function takes one or more streams and returns a readable combining
+ * the streams, such that it gathers chunks from all streams into an array and
+ * then pushes them onto the combined stream, by waiting for all streams to
+ * have pushed a chunk.
+ */
 
 export default function merge(...streams: Array<ReadableStream>): ReadableStream {
   let readers: Array<ReadableStreamReader>,

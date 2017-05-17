@@ -1,16 +1,14 @@
 // @flow
 
-// connect :: Streams... -> ReadableStream | Promise
-// connect function takes one or more streams
-// and sequentially pipes them to each other,
-// returning the result of the last pipe operation.
-//
-
 import type { ReadableWritable } from "./streams";
 import { ReadableStream, WritableStream } from "./streams";
 
 import { isTransform, isWritable } from "./utils";
 
+/**
+ * This function takes one or more streams and sequentially pipes them to each other,
+ * returning the result of the last pipe operation.
+ */
 export default function connect(
     origin: ReadableStream | ReadableWritable,
     ...streams: Array<WritableStream | ReadableWritable>

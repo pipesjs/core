@@ -1,14 +1,5 @@
 // @flow
 
-// chain :: TransformStreams... -> { readable, writable }
-// chain function takes one or more
-// transform streams / { readable, writable } pairs
-// connects them to each other,
-// takes the readable of the end and the writable of the head,
-// returns the { readable, writable } pair that is
-// compatible with `ReadableStream::pipeThrough`
-//
-
 import type { ReadableWritable } from "./streams";
 
 import { _connect } from "./connect";
@@ -19,6 +10,12 @@ const
     Only transform streams and readable-writable pairs can be chained
   `;
 
+/**
+ * This function takes one or more transform streams / { readable, writable } pairs
+ * connects them to each other. Then takes the readable of the end and the writable
+ * of the head and returns the { readable, writable } pair that is
+ * compatible with `ReadableStream::pipeThrough`.
+ */
 export default function chain(
     origin: ReadableWritable, ...streams: Array<ReadableWritable>
 ): ReadableWritable {

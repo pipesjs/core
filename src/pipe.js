@@ -1,16 +1,15 @@
-// pipe :: Function | Generator Function -> Opts {} -> TransformBlueprint
-// pipe takes any normal/generator func and returns transform stream blueprint.
-//
-// pipe.async :: Async Function -> Opts {} -> TransformBlueprint
-// pipe.async takes any async func and returns transform stream blueprint.
-//
-
 import { isFunction, isGeneratorFn } from "./utils";
 
 import pipeAsync from "./pipeAsync";
 import pipeFn from "./pipeFn";
 import pipeGen from "./pipeGen";
 
+/**
+ * This function takes any normal/generator func and returns a transform stream.
+ * @param {function} fn a function or a generator that returns transformed values
+ * @param {object} opts containing config options
+ * @returns TransformStream
+ */
 export default function pipe ( fn, opts ) {
   let blueprint;
 
@@ -32,10 +31,15 @@ export default function pipe ( fn, opts ) {
     return blueprint;
 }
 
-// Add async support
+/**
+ * This function takes any async func and returns a transform stream.
+ * @name pipe.async
+ * @param {function} asyncFunction an async function that returns a Promise
+ * @param {object} opts containing config options
+ * @returns TransformStream
+ */
 pipe.async = pipeAsync;
 
 // Browserify compat
 if ( typeof module !== "undefined" )
   module.exports = pipe;
-
