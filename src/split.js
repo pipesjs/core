@@ -46,3 +46,8 @@ export default function split(
 
   return result;
 }
+
+// Browserify compat
+if ( typeof module !== "undefined" )
+  // $FlowFixMe
+  module.exports = split;

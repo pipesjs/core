@@ -87,3 +87,11 @@ export default function merge(...streams: Array<ReadableStream>): ReadableStream
     }
   });
 };
+
+// FIXME: Internal flow.js resolution problem workaround
+export const _merge = merge;
+
+// Browserify compat
+if ( typeof module !== "undefined" )
+  // $FlowFixMe
+  module.exports = merge;

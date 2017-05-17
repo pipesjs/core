@@ -11,7 +11,7 @@
 
 import type { ReadableWritable } from "./streams";
 
-import connect from "./connect";
+import { _connect } from "./connect";
 import { isTransform, isReadable } from "./utils";
 
 const
@@ -30,7 +30,7 @@ export default function chain(
   // connect the streams
   const
     { writable } = origin,
-    readable = connect( origin, ...streams );
+    readable = _connect( origin, ...streams );
 
   // Check if null stream
   if ( !isReadable( readable ))
@@ -42,3 +42,8 @@ export default function chain(
     writable
   };
 }
+
+// Browserify compat
+if ( typeof module !== "undefined" )
+  // $FlowFixMe
+  module.exports = chain;

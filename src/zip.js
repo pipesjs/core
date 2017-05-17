@@ -12,7 +12,7 @@
 import type { ReadableWritable } from "./streams";
 import { ReadableStream } from "./streams";
 
-import merge from "./merge";
+import { _merge } from "./merge";
 import pipe from "./pipe";
 
 export default function zip(...streams: Array<ReadableStream>): ReadableStream {
@@ -20,7 +20,7 @@ export default function zip(...streams: Array<ReadableStream>): ReadableStream {
       merged: ReadableStream;
 
   // Merge streams
-  merged = merge(...streams);
+  merged = _merge(...streams);
 
   // Create applier
   applier = new pipe( chunks => {
@@ -35,3 +35,8 @@ export default function zip(...streams: Array<ReadableStream>): ReadableStream {
   // return zipped stream
   return merged.pipeThrough( applier );
 }
+
+// Browserify compat
+if ( typeof module !== "undefined" )
+  // $FlowFixMe
+  module.exports = zip;

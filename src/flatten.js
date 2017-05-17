@@ -53,3 +53,8 @@ export default function flatten(...streams: Array<ReadableStream>): ReadableStre
     }
   });
 };
+
+// Browserify compat
+if ( typeof module !== "undefined" )
+  // $FlowFixMe
+  module.exports = flatten;

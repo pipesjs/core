@@ -57,3 +57,11 @@ export default function connect(
   // Return result
   return end;
 }
+
+// FIXME: Internal flow.js resolution problem workaround
+export const _connect = connect;
+
+// Browserify compat
+if ( typeof module !== "undefined" )
+  // $FlowFixMe
+  module.exports = connect;
