@@ -7,6 +7,11 @@ exports.default = split;
 
 var _streams = require("./streams");
 
+/**
+ * This function takes a readable stream and a number and returns an array of
+ * tee'd readable streams, with a `cancelAll` function that cancels all the tee'd
+ * streams and in turn the original stream.
+ */
 function split(stream) {
   var parts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
 
@@ -50,9 +55,9 @@ function split(stream) {
   return result;
 }
 
-// split :: ReadableStream -> Int -> [ReadableStream]
-// split function takes a readable stream and number
-// and returns an array of tee'd readable streams,
-// with a `cancelAll` function that cancels all the tee'd
-// streams and hence the original stream.
-//
+// Browserify compat
+
+
+if (typeof module !== "undefined")
+  // $FlowFixMe
+  module.exports = split;

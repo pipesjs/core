@@ -12,27 +12,16 @@ var _utils = require("./utils");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-// accumulate :: Function -> InitValue -> ReadableWritableBlueprint
-// accumulate function takes a reducer function,
-// and an optional inital value.
-//
-// Returns a ReadableWritableBlueprint that consumes piped
-// stream, combining the values with the reducer
-// and enqueues the result.
-//
-// reducer :: PrevValue -> CurrValue -> NextValue
-// reducer function gets:
-//
-// PrevValue: the previous value or InitValue (if supplied)
-// CurrValue: the current value being processed.
-//
-// that returns NextValue which in turn becomes PrevValue
-// for the next iteration until the input stream is
-// entirely consumed.
-//
-
 var compatibilityError = "\n    accumulate takes a reducing function\n  ";
 
+/**
+ * This function takes a reducer function and an optional initial value and
+ * returns a transformstream that accumulates the values of any stream piped to it.
+ *
+ * @param {function} reducer a function that takes sequential values and reduces them
+ * @returns {TransformStream} a ReadableWritable that consumes piped
+ * stream, combining the values with the reducer and enqueues the result.
+ */
 function accumulate(reducer, init) {
   // check if reducer is a function
   if (!(0, _utils.isFunction)(reducer)) throw new Error(compatibilityError);
@@ -129,24 +118,19 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = chain;
 
-var _connect = require("./connect");
-
-var _connect2 = _interopRequireDefault(_connect);
+var _connect2 = require("./connect");
 
 var _utils = require("./utils");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var compatibilityError = "\n    Only transform streams and readable-writable pairs can be chained\n  ";
 
-// chain :: TransformStreams... -> { readable, writable }
-// chain function takes one or more
-// transform streams / { readable, writable } pairs
-// connects them to each other,
-// takes the readable of the end and the writable of the head,
-// returns the { readable, writable } pair that is
-// compatible with `ReadableStream::pipeThrough`
-//
+/**
+ * This function takes one or more transform streams / { readable, writable } pairs
+ * connects them to each other. Then takes the readable of the end and the writable
+ * of the head and returns the { readable, writable } pair that is
+ * compatible with `ReadableStream::pipeThrough`.
+ */
+
 
 function chain(origin) {
 
@@ -160,7 +144,7 @@ function chain(origin) {
   }
 
   var writable = origin.writable,
-      readable = _connect2.default.apply(undefined, [origin].concat(streams));
+      readable = _connect2._connect.apply(undefined, [origin].concat(streams));
 
   // Check if null stream
   if (!(0, _utils.isReadable)(readable)) throw new Error(compatibilityError);
@@ -171,18 +155,28 @@ function chain(origin) {
     writable: writable
   };
 }
+
+// Browserify compat
+if (typeof module !== "undefined")
+  // $FlowFixMe
+  module.exports = chain;
 },{"./connect":3,"./utils":13}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports._connect = undefined;
 exports.default = connect;
 
 var _streams = require("./streams");
 
 var _utils = require("./utils");
 
+/**
+ * This function takes one or more streams and sequentially pipes them to each other,
+ * returning the result of the last pipe operation.
+ */
 function connect(origin) {
 
   // Check origin
@@ -245,11 +239,15 @@ function connect(origin) {
   return end;
 }
 
-// connect :: Streams... -> ReadableStream | Promise
-// connect function takes one or more streams
-// and sequentially pipes them to each other,
-// returning the result of the last pipe operation.
-//
+// FIXME: Internal flow.js resolution problem workaround
+
+
+var _connect = exports._connect = connect;
+
+// Browserify compat
+if (typeof module !== "undefined")
+  // $FlowFixMe
+  module.exports = connect;
 },{"./streams":12,"./utils":13}],4:[function(require,module,exports){
 "use strict";
 
@@ -262,6 +260,10 @@ var _streams = require("./streams");
 
 var _utils = require("./utils");
 
+/**
+ * This function takes one or more streams and returns a readable combining
+ * the streams, returning chunks as they arrive in combined streams.
+ */
 function flatten() {
   for (var _len = arguments.length, streams = Array(_len), _key = 0; _key < _len; _key++) {
     streams[_key] = arguments[_key];
@@ -303,13 +305,12 @@ function flatten() {
   });
 }
 
-// flatten :: ReadableStream... -> ReadableStream
-// flatten function takes one or more streams
-// and returns a readable combining the streams,
-// returning chunks as they arrive in combined streams.
-//
-
 ;
+
+// Browserify compat
+if (typeof module !== "undefined")
+  // $FlowFixMe
+  module.exports = flatten;
 },{"./streams":12,"./utils":13}],5:[function(require,module,exports){
 "use strict";
 
@@ -381,21 +382,12 @@ exports.default = fns;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports._merge = undefined;
 exports.default = merge;
 
 var _streams = require("./streams");
 
 // Parses arrays of {value, done} pairs to final pair
-
-
-// merge :: ReadableStream... -> ReadableStream
-// merge function takes one or more streams
-// and returns a readable combining the streams,
-// such that it gathers chunks from all streams
-// into an array and then pushes them onto the combined
-// stream, by waiting for all streams to have pushed a chunk.
-//
-
 function parseResults(results) {
   var ended = false,
       values = [];
@@ -437,6 +429,13 @@ function parseResults(results) {
     done: ended
   };
 }
+
+/**
+ * This function takes one or more streams and returns a readable combining
+ * the streams, such that it gathers chunks from all streams into an array and
+ * then pushes them onto the combined stream, by waiting for all streams to
+ * have pushed a chunk.
+ */
 
 function merge() {
   for (var _len = arguments.length, streams = Array(_len), _key = 0; _key < _len; _key++) {
@@ -499,6 +498,14 @@ function merge() {
     }
   });
 };
+
+// FIXME: Internal flow.js resolution problem workaround
+var _merge = exports._merge = merge;
+
+// Browserify compat
+if (typeof module !== "undefined")
+  // $FlowFixMe
+  module.exports = merge;
 },{"./streams":12}],7:[function(require,module,exports){
 "use strict";
 
@@ -523,13 +530,64 @@ var _pipeGen2 = _interopRequireDefault(_pipeGen);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// pipe :: Function | Generator Function -> Opts {} -> TransformBlueprint
-// pipe takes any normal/generator func and returns transform stream blueprint.
-//
-// pipe.async :: Async Function -> Opts {} -> TransformBlueprint
-// pipe.async takes any async func and returns transform stream blueprint.
-//
-
+/**
+ * This function takes any normal/generator func and returns a transform stream.
+ * @param {function} fn a function or a generator that returns transformed values
+ * @param {object} opts containing config options
+ *
+ * @returns {TransformStream}
+ *
+ * @example
+ *
+ *   // Setup
+ *   let createReadable = data => new ReadableStream({
+ *       start (controller) {
+ *       this.data = data || [1,2,3];
+ *
+ *       // Kickstart stream
+ *       controller.enqueue( this.data.pop() );
+ *       },
+ *       pull (controller) {
+ *       if ( !this.data.length )
+ *           return controller.close()
+ *
+ *       controller.enqueue( this.data.pop() );
+ *       }
+ *   }),
+ *   createWritable = () => new WritableStream({
+ *       write (chunk) {
+ *       console.log( chunk );
+ *       }
+ *   });
+ *
+ *   // Pure funtion example
+ *   let negator = pipe( n => -n ),
+ *     rIn = createReadable(),
+ *     rOut;
+ *
+ *   rOut = rIn.pipeThrough( new negator );  // -1, -2, -3
+ *
+ *   // Basic generator example
+ *   let doubler = pipe( function* (v) {
+ *       yield v;
+ *       yield v;
+ *   }),
+ *   rIn = createReadable(),
+ *   rOut;
+ *
+ *   rOut = rIn.pipeThrough( new doubler );  // 1, 1, 2, 2, 3, 3
+ *
+ *   // Infinite generator example
+ *
+ *   let inf = pipe( function* (v) {
+ *       // Close on shutdown signal
+ *       while( !( yield v ));
+ *   }, {
+ *       init: 1
+ *   });
+ *
+ *   new inf;    // 1, 1, 1, 1...
+ */
 function pipe(fn, opts) {
   var blueprint = void 0;
 
@@ -540,7 +598,13 @@ function pipe(fn, opts) {
   if (this instanceof pipe) return new blueprint();else return blueprint;
 }
 
-// Add async support
+/**
+ * This function takes any async func and returns a transform stream.
+ * @name pipe.async
+ * @param {function} asyncFunction an async function that returns a Promise
+ * @param {object} opts containing config options
+ * @returns TransformStream
+ */
 pipe.async = _pipeAsync2.default;
 
 // Browserify compat
@@ -900,6 +964,11 @@ exports.default = split;
 
 var _streams = require("./streams");
 
+/**
+ * This function takes a readable stream and a number and returns an array of
+ * tee'd readable streams, with a `cancelAll` function that cancels all the tee'd
+ * streams and in turn the original stream.
+ */
 function split(stream) {
   var parts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
 
@@ -943,12 +1012,12 @@ function split(stream) {
   return result;
 }
 
-// split :: ReadableStream -> Int -> [ReadableStream]
-// split function takes a readable stream and number
-// and returns an array of tee'd readable streams,
-// with a `cancelAll` function that cancels all the tee'd
-// streams and hence the original stream.
-//
+// Browserify compat
+
+
+if (typeof module !== "undefined")
+  // $FlowFixMe
+  module.exports = split;
 },{"./streams":12}],12:[function(require,module,exports){
 "use strict";
 

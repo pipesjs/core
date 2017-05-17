@@ -3,21 +3,12 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports._merge = undefined;
 exports.default = merge;
 
 var _streams = require("./streams");
 
 // Parses arrays of {value, done} pairs to final pair
-
-
-// merge :: ReadableStream... -> ReadableStream
-// merge function takes one or more streams
-// and returns a readable combining the streams,
-// such that it gathers chunks from all streams
-// into an array and then pushes them onto the combined
-// stream, by waiting for all streams to have pushed a chunk.
-//
-
 function parseResults(results) {
   var ended = false,
       values = [];
@@ -59,6 +50,13 @@ function parseResults(results) {
     done: ended
   };
 }
+
+/**
+ * This function takes one or more streams and returns a readable combining
+ * the streams, such that it gathers chunks from all streams into an array and
+ * then pushes them onto the combined stream, by waiting for all streams to
+ * have pushed a chunk.
+ */
 
 function merge() {
   for (var _len = arguments.length, streams = Array(_len), _key = 0; _key < _len; _key++) {
@@ -121,3 +119,11 @@ function merge() {
     }
   });
 };
+
+// FIXME: Internal flow.js resolution problem workaround
+var _merge = exports._merge = merge;
+
+// Browserify compat
+if (typeof module !== "undefined")
+  // $FlowFixMe
+  module.exports = merge;

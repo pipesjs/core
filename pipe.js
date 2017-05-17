@@ -21,13 +21,64 @@ var _pipeGen2 = _interopRequireDefault(_pipeGen);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// pipe :: Function | Generator Function -> Opts {} -> TransformBlueprint
-// pipe takes any normal/generator func and returns transform stream blueprint.
-//
-// pipe.async :: Async Function -> Opts {} -> TransformBlueprint
-// pipe.async takes any async func and returns transform stream blueprint.
-//
-
+/**
+ * This function takes any normal/generator func and returns a transform stream.
+ * @param {function} fn a function or a generator that returns transformed values
+ * @param {object} opts containing config options
+ *
+ * @returns {TransformStream}
+ *
+ * @example
+ *
+ *   // Setup
+ *   let createReadable = data => new ReadableStream({
+ *       start (controller) {
+ *       this.data = data || [1,2,3];
+ *
+ *       // Kickstart stream
+ *       controller.enqueue( this.data.pop() );
+ *       },
+ *       pull (controller) {
+ *       if ( !this.data.length )
+ *           return controller.close()
+ *
+ *       controller.enqueue( this.data.pop() );
+ *       }
+ *   }),
+ *   createWritable = () => new WritableStream({
+ *       write (chunk) {
+ *       console.log( chunk );
+ *       }
+ *   });
+ *
+ *   // Pure funtion example
+ *   let negator = pipe( n => -n ),
+ *     rIn = createReadable(),
+ *     rOut;
+ *
+ *   rOut = rIn.pipeThrough( new negator );  // -1, -2, -3
+ *
+ *   // Basic generator example
+ *   let doubler = pipe( function* (v) {
+ *       yield v;
+ *       yield v;
+ *   }),
+ *   rIn = createReadable(),
+ *   rOut;
+ *
+ *   rOut = rIn.pipeThrough( new doubler );  // 1, 1, 2, 2, 3, 3
+ *
+ *   // Infinite generator example
+ *
+ *   let inf = pipe( function* (v) {
+ *       // Close on shutdown signal
+ *       while( !( yield v ));
+ *   }, {
+ *       init: 1
+ *   });
+ *
+ *   new inf;    // 1, 1, 1, 1...
+ */
 function pipe(fn, opts) {
   var blueprint = void 0;
 
@@ -38,7 +89,13 @@ function pipe(fn, opts) {
   if (this instanceof pipe) return new blueprint();else return blueprint;
 }
 
-// Add async support
+/**
+ * This function takes any async func and returns a transform stream.
+ * @name pipe.async
+ * @param {function} asyncFunction an async function that returns a Promise
+ * @param {object} opts containing config options
+ * @returns TransformStream
+ */
 pipe.async = _pipeAsync2.default;
 
 // Browserify compat

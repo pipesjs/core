@@ -7,9 +7,7 @@ exports.default = zip;
 
 var _streams = require("./streams");
 
-var _merge = require("./merge");
-
-var _merge2 = _interopRequireDefault(_merge);
+var _merge2 = require("./merge");
 
 var _pipe = require("./pipe");
 
@@ -21,21 +19,18 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
 
-// zip :: ReadableStream... -> ReadableStream
-// zip function takes one or more streams
-// and returns a readable combining the streams,
-// such that it gathers chunks from all streams
-// applying the first chunk as a function to the rest
-// and then pushes them onto the combined
-// stream, by waiting for all streams to have pushed a chunk.
-//
-
+/**
+ * This function takes one or more streams and returns a readable combining
+ * the streams such that it gathers chunks from all streams by  applying the
+ * first chunk as a function to the rest and then pushes them onto the combined
+ * stream, by waiting for all streams to have pushed a chunk.
+ */
 function zip() {
   var applier = void 0,
       merged = void 0;
 
   // Merge streams
-  merged = _merge2.default.apply(undefined, arguments);
+  merged = _merge2._merge.apply(undefined, arguments);
 
   // Create applier
   applier = new _pipe2.default(function (chunks) {
@@ -51,3 +46,8 @@ function zip() {
   // return zipped stream
   return merged.pipeThrough(applier);
 }
+
+// Browserify compat
+if (typeof module !== "undefined")
+  // $FlowFixMe
+  module.exports = zip;

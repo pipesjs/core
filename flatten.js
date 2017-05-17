@@ -9,6 +9,10 @@ var _streams = require("./streams");
 
 var _utils = require("./utils");
 
+/**
+ * This function takes one or more streams and returns a readable combining
+ * the streams, returning chunks as they arrive in combined streams.
+ */
 function flatten() {
   for (var _len = arguments.length, streams = Array(_len), _key = 0; _key < _len; _key++) {
     streams[_key] = arguments[_key];
@@ -50,10 +54,9 @@ function flatten() {
   });
 }
 
-// flatten :: ReadableStream... -> ReadableStream
-// flatten function takes one or more streams
-// and returns a readable combining the streams,
-// returning chunks as they arrive in combined streams.
-//
-
 ;
+
+// Browserify compat
+if (typeof module !== "undefined")
+  // $FlowFixMe
+  module.exports = flatten;

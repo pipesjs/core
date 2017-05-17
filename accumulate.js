@@ -11,27 +11,16 @@ var _utils = require("./utils");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-// accumulate :: Function -> InitValue -> ReadableWritableBlueprint
-// accumulate function takes a reducer function,
-// and an optional inital value.
-//
-// Returns a ReadableWritableBlueprint that consumes piped
-// stream, combining the values with the reducer
-// and enqueues the result.
-//
-// reducer :: PrevValue -> CurrValue -> NextValue
-// reducer function gets:
-//
-// PrevValue: the previous value or InitValue (if supplied)
-// CurrValue: the current value being processed.
-//
-// that returns NextValue which in turn becomes PrevValue
-// for the next iteration until the input stream is
-// entirely consumed.
-//
-
 var compatibilityError = "\n    accumulate takes a reducing function\n  ";
 
+/**
+ * This function takes a reducer function and an optional initial value and
+ * returns a transformstream that accumulates the values of any stream piped to it.
+ *
+ * @param {function} reducer a function that takes sequential values and reduces them
+ * @returns {TransformStream} a ReadableWritable that consumes piped
+ * stream, combining the values with the reducer and enqueues the result.
+ */
 function accumulate(reducer, init) {
   // check if reducer is a function
   if (!(0, _utils.isFunction)(reducer)) throw new Error(compatibilityError);

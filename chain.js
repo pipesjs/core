@@ -5,24 +5,19 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = chain;
 
-var _connect = require("./connect");
-
-var _connect2 = _interopRequireDefault(_connect);
+var _connect2 = require("./connect");
 
 var _utils = require("./utils");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var compatibilityError = "\n    Only transform streams and readable-writable pairs can be chained\n  ";
 
-// chain :: TransformStreams... -> { readable, writable }
-// chain function takes one or more
-// transform streams / { readable, writable } pairs
-// connects them to each other,
-// takes the readable of the end and the writable of the head,
-// returns the { readable, writable } pair that is
-// compatible with `ReadableStream::pipeThrough`
-//
+/**
+ * This function takes one or more transform streams / { readable, writable } pairs
+ * connects them to each other. Then takes the readable of the end and the writable
+ * of the head and returns the { readable, writable } pair that is
+ * compatible with `ReadableStream::pipeThrough`.
+ */
+
 
 function chain(origin) {
 
@@ -36,7 +31,7 @@ function chain(origin) {
   }
 
   var writable = origin.writable,
-      readable = _connect2.default.apply(undefined, [origin].concat(streams));
+      readable = _connect2._connect.apply(undefined, [origin].concat(streams));
 
   // Check if null stream
   if (!(0, _utils.isReadable)(readable)) throw new Error(compatibilityError);
@@ -47,3 +42,8 @@ function chain(origin) {
     writable: writable
   };
 }
+
+// Browserify compat
+if (typeof module !== "undefined")
+  // $FlowFixMe
+  module.exports = chain;

@@ -3,12 +3,17 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports._connect = undefined;
 exports.default = connect;
 
 var _streams = require("./streams");
 
 var _utils = require("./utils");
 
+/**
+ * This function takes one or more streams and sequentially pipes them to each other,
+ * returning the result of the last pipe operation.
+ */
 function connect(origin) {
 
   // Check origin
@@ -71,8 +76,12 @@ function connect(origin) {
   return end;
 }
 
-// connect :: Streams... -> ReadableStream | Promise
-// connect function takes one or more streams
-// and sequentially pipes them to each other,
-// returning the result of the last pipe operation.
-//
+// FIXME: Internal flow.js resolution problem workaround
+
+
+var _connect = exports._connect = connect;
+
+// Browserify compat
+if (typeof module !== "undefined")
+  // $FlowFixMe
+  module.exports = connect;

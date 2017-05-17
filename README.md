@@ -207,11 +207,10 @@ This function takes any normal/generator func and returns a transform stream.
 
   // Pure funtion example
   let negator = pipe( n => -n ),
-  rIn = createReadable(),
-  rOut;
+    rIn = createReadable(),
+    rOut;
 
   rOut = rIn.pipeThrough( new negator );  // -1, -2, -3
-
 
   // Basic generator example
   let doubler = pipe( function* (v) {
@@ -222,7 +221,6 @@ This function takes any normal/generator func and returns a transform stream.
   rOut;
 
   rOut = rIn.pipeThrough( new doubler );  // 1, 1, 2, 2, 3, 3
-
 
   // Infinite generator example
 
