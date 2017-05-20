@@ -56,6 +56,14 @@ function parseResults(results) {
  * the streams, such that it gathers chunks from all streams into an array and
  * then pushes them onto the combined stream, by waiting for all streams to
  * have pushed a chunk.
+ *
+ * @example
+ * let r1 = createReadable([1,2,3]),
+ *   r2 = createReadable([4,5,6,7]),
+ *   writable = createWritable(),
+ *   merged = merge(r1,r2);
+ *
+ * merged.pipeTo( writable );   // [1,4], [2,5], [3,6]
  */
 
 function merge() {

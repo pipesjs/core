@@ -11,6 +11,15 @@ var _streams = require("./streams");
  * This function takes a readable stream and a number and returns an array of
  * tee'd readable streams, with a `cancelAll` function that cancels all the tee'd
  * streams and in turn the original stream.
+ *
+ * @example
+ * let readable = createReadable([1,2,3]),
+ *   [r1, r2] = split( readable ),
+ *   w1 = createWritable(),
+ *   w2 = createWritable();
+ *
+ * r1.pipeTo( w1 );   // 1, 2, 3
+ * r2.pipeTo( w2 );   // 1, 2, 3
  */
 function split(stream) {
   var parts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;

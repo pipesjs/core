@@ -195,8 +195,17 @@ var _streams = require("./streams");
 var _utils = require("./utils");
 
 /**
- * This function takes one or more streams and sequentially pipes them to each other,
- * returning the result of the last pipe operation.
+ * This function takes any number of `transform streams` with an optional `readable` at the head and a `writable` at the tail.
+ * It connects them together by applying `pipeThrough` recursively and returns the resulting `readable` that acts as a composition of the input `streams`.
+ *
+ * In case, a `writable` is passed at the tail, the resulting `readable` is `pipeTo`d and the resulting `promise` is returned.
+ *
+ * @example
+ * let readable = createReadable(),
+ *   writable = createWritable(),
+ *   passThrough = pipe( k => k );
+ *
+ * let promise = connect( readable, passThrough, writable );   // 1, 2, 3
  */
 function connect(origin) {
 
@@ -284,6 +293,14 @@ var _utils = require("./utils");
 /**
  * This function takes one or more streams and returns a readable combining
  * the streams, returning chunks as they arrive in combined streams.
+ *
+ * @example
+ * let r1 = createReadable([1,2,3]),
+ *   r2 = createReadable([4,5,6]),
+ *   writable = createWritable(),
+ *   flattened = flatten(r1,r2);
+ *
+ * flattened.pipeTo( writable );   // 1,4,2,5,3,6   (order depends on order received so may vary)
  */
 function flatten() {
   for (var _len = arguments.length, streams = Array(_len), _key = 0; _key < _len; _key++) {
@@ -456,6 +473,14 @@ function parseResults(results) {
  * the streams, such that it gathers chunks from all streams into an array and
  * then pushes them onto the combined stream, by waiting for all streams to
  * have pushed a chunk.
+ *
+ * @example
+ * let r1 = createReadable([1,2,3]),
+ *   r2 = createReadable([4,5,6,7]),
+ *   writable = createWritable(),
+ *   merged = merge(r1,r2);
+ *
+ * merged.pipeTo( writable );   // [1,4], [2,5], [3,6]
  */
 
 function merge() {
@@ -993,6 +1018,15 @@ var _streams = require("./streams");
  * This function takes a readable stream and a number and returns an array of
  * tee'd readable streams, with a `cancelAll` function that cancels all the tee'd
  * streams and in turn the original stream.
+ *
+ * @example
+ * let readable = createReadable([1,2,3]),
+ *   [r1, r2] = split( readable ),
+ *   w1 = createWritable(),
+ *   w2 = createWritable();
+ *
+ * r1.pipeTo( w1 );   // 1, 2, 3
+ * r2.pipeTo( w2 );   // 1, 2, 3
  */
 function split(stream) {
   var parts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;

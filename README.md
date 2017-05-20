@@ -162,13 +162,25 @@ stream, combining the values with the reducer and enqueues the result.
 
 ## connect
 
-This function takes one or more streams and sequentially pipes them to each other,
-returning the result of the last pipe operation.
+This function takes any number of `transform streams` with an optional `readable` at the head and a `writable` at the tail.
+It connects them together by applying `pipeThrough` recursively and returns the resulting `readable` that acts as a composition of the input `streams`.
+
+In case, a `writable` is passed at the tail, the resulting `readable` is `pipeTo`d and the resulting `promise` is returned.
 
 **Parameters**
 
 -   `origin` **(ReadableStream | ReadableWritable)** 
 -   `streams` **...[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;(WritableStream | ReadableWritable)>** 
+
+**Examples**
+
+```javascript
+let readable = createReadable(),
+  writable = createWritable(),
+  passThrough = pipe( k => k );
+
+let promise = connect( readable, passThrough, writable );   // 1, 2, 3
+```
 
 Returns **(ReadableStream | [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;any>)** 
 
@@ -208,6 +220,17 @@ the streams, returning chunks as they arrive in combined streams.
 
 -   `streams` **...[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;ReadableStream>** 
 
+**Examples**
+
+```javascript
+let r1 = createReadable([1,2,3]),
+  r2 = createReadable([4,5,6]),
+  writable = createWritable(),
+  flattened = flatten(r1,r2);
+
+flattened.pipeTo( writable );   // 1,4,2,5,3,6   (order depends on order received so may vary)
+```
+
 Returns **ReadableStream** 
 
 ## merge
@@ -220,6 +243,17 @@ have pushed a chunk.
 **Parameters**
 
 -   `streams` **...[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;ReadableStream>** 
+
+**Examples**
+
+```javascript
+let r1 = createReadable([1,2,3]),
+  r2 = createReadable([4,5,6,7]),
+  writable = createWritable(),
+  merged = merge(r1,r2);
+
+merged.pipeTo( writable );   // [1,4], [2,5], [3,6]
+```
 
 Returns **ReadableStream** 
 
@@ -317,5 +351,17 @@ streams and in turn the original stream.
 
 -   `stream` **ReadableStream** 
 -   `parts` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)**  (optional, default `2`)
+
+**Examples**
+
+```javascript
+let readable = createReadable([1,2,3]),
+  [r1, r2] = split( readable ),
+  w1 = createWritable(),
+  w2 = createWritable();
+
+r1.pipeTo( w1 );   // 1, 2, 3
+r2.pipeTo( w2 );   // 1, 2, 3
+```
 
 Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;ReadableStream>** 
