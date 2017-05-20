@@ -6,8 +6,17 @@ import { ReadableStream, WritableStream } from "./streams";
 import { isTransform, isWritable } from "./utils";
 
 /**
- * This function takes one or more streams and sequentially pipes them to each other,
- * returning the result of the last pipe operation.
+ * This function takes any number of `transform streams` with an optional `readable` at the head and a `writable` at the tail.
+ * It connects them together by applying `pipeThrough` recursively and returns the resulting `readable` that acts as a composition of the input `streams`.
+ *
+ * In case, a `writable` is passed at the tail, the resulting `readable` is `pipeTo`d and the resulting `promise` is returned.
+ *
+ * @example
+ * let readable = createReadable(),
+ *   writable = createWritable(),
+ *   passThrough = pipe( k => k );
+ *
+ * let promise = connect( readable, passThrough, writable );   // 1, 2, 3
  */
 export default function connect(
     origin: ReadableStream | ReadableWritable,
