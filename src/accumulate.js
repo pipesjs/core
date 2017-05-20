@@ -17,8 +17,19 @@ const
  * returns a transformstream that accumulates the values of any stream piped to it.
  *
  * @param {function} reducer a function that takes sequential values and reduces them
+ *
  * @returns {TransformStream} a ReadableWritable that consumes piped
  * stream, combining the values with the reducer and enqueues the result.
+ *
+ * @example
+ * let readable, accumulator, accumulated, total;
+ *
+ *   // Create streams
+ *   readable = createTestReadable( [1,2,3] );
+ *
+ *   // Connect the streams
+ *   accumulator = accumulate( (a, b) => a+b, 4 );
+ *   accumulated = readable.pipeThrough( new accumulator );    // 10
  */
 export default function accumulate(reducer: (mixed, mixed) => mixed, init: ?mixed) {
   // check if reducer is a function
