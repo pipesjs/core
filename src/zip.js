@@ -11,6 +11,16 @@ import pipe from "./pipe";
  * the streams such that it gathers chunks from all streams by  applying the
  * first chunk as a function to the rest and then pushes them onto the combined
  * stream, by waiting for all streams to have pushed a chunk.
+ *
+ * @example
+ * let add = (a, b) => a + b,
+ *   rFn = createReadable([add,add,add]),
+ *   r1 = createReadable([1,2,3]),
+ *   r2 = createReadable([4,5,6]),
+ *   writable = createWritable(),
+ *   zipped = zip(rFn,r1,r2);
+ *
+ * zipped.pipeTo( writable );   // 5, 7, 9
  */
 export default function zip(...streams: Array<ReadableStream>): ReadableStream {
   let applier: ReadableWritable,

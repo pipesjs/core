@@ -6,6 +6,15 @@ import { ReadableStream } from "./streams";
  * This function takes a readable stream and a number and returns an array of
  * tee'd readable streams, with a `cancelAll` function that cancels all the tee'd
  * streams and in turn the original stream.
+ *
+ * @example
+ * let readable = createReadable([1,2,3]),
+ *   [r1, r2] = split( readable ),
+ *   w1 = createWritable(),
+ *   w2 = createWritable();
+ *
+ * r1.pipeTo( w1 );   // 1, 2, 3
+ * r2.pipeTo( w2 );   // 1, 2, 3
  */
 export default function split(
   stream: ReadableStream, parts: number = 2
