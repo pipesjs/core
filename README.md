@@ -144,6 +144,19 @@ returns a transformstream that accumulates the values of any stream piped to it.
 -   `reducer` **[function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function)** a function that takes sequential values and reduces them
 -   `init` **any?** 
 
+**Examples**
+
+```javascript
+let readable, accumulator, accumulated, total;
+
+  // Create streams
+  readable = createTestReadable( [1,2,3] );
+
+  // Connect the streams
+  accumulator = accumulate( (a, b) => a+b, 4 );
+  accumulated = readable.pipeThrough( new accumulator );    // 10
+```
+
 Returns **TransformStream** a ReadableWritable that consumes piped
 stream, combining the values with the reducer and enqueues the result.
 
@@ -170,6 +183,19 @@ compatible with `ReadableStream::pipeThrough`.
 
 -   `origin` **ReadableWritable** 
 -   `streams` **...[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;ReadableWritable>** 
+
+**Examples**
+
+```javascript
+// Pure funtion example
+let negator = pipe( n => -n ),
+  doubler = pipe( n => 2*n ),
+  composed = chain( new negator, new doubler ),
+  rIn = createReadable(),
+  rOut;
+
+rOut = rIn.pipeThrough( composed );  // -2, -4, -6
+```
 
 Returns **ReadableWritable** 
 

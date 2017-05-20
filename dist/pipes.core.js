@@ -19,8 +19,19 @@ var compatibilityError = "\n    accumulate takes a reducing function\n  ";
  * returns a transformstream that accumulates the values of any stream piped to it.
  *
  * @param {function} reducer a function that takes sequential values and reduces them
+ *
  * @returns {TransformStream} a ReadableWritable that consumes piped
  * stream, combining the values with the reducer and enqueues the result.
+ *
+ * @example
+ * let readable, accumulator, accumulated, total;
+ *
+ *   // Create streams
+ *   readable = createTestReadable( [1,2,3] );
+ *
+ *   // Connect the streams
+ *   accumulator = accumulate( (a, b) => a+b, 4 );
+ *   accumulated = readable.pipeThrough( new accumulator );    // 10
  */
 function accumulate(reducer, init) {
   // check if reducer is a function
@@ -129,6 +140,16 @@ var compatibilityError = "\n    Only transform streams and readable-writable pai
  * connects them to each other. Then takes the readable of the end and the writable
  * of the head and returns the { readable, writable } pair that is
  * compatible with `ReadableStream::pipeThrough`.
+ *
+ * @example
+ * // Pure funtion example
+ * let negator = pipe( n => -n ),
+ *   doubler = pipe( n => 2*n ),
+ *   composed = chain( new negator, new doubler ),
+ *   rIn = createReadable(),
+ *   rOut;
+ *
+ * rOut = rIn.pipeThrough( composed );  // -2, -4, -6
  */
 
 

@@ -15,6 +15,16 @@ const
  * connects them to each other. Then takes the readable of the end and the writable
  * of the head and returns the { readable, writable } pair that is
  * compatible with `ReadableStream::pipeThrough`.
+ *
+ * @example
+ * // Pure funtion example
+ * let negator = pipe( n => -n ),
+ *   doubler = pipe( n => 2*n ),
+ *   composed = chain( new negator, new doubler ),
+ *   rIn = createReadable(),
+ *   rOut;
+ *
+ * rOut = rIn.pipeThrough( composed );  // -2, -4, -6
  */
 export default function chain(
     origin: ReadableWritable, ...streams: Array<ReadableWritable>
