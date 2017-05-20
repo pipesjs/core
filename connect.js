@@ -89,6 +89,7 @@ function connect(origin) {
 
 
 var _connect = exports._connect = connect;
+connect._connect = connect;
 
 // Browserify compat
 if (typeof module !== "undefined")

@@ -273,6 +273,7 @@ function connect(origin) {
 
 
 var _connect = exports._connect = connect;
+connect._connect = connect;
 
 // Browserify compat
 if (typeof module !== "undefined")
@@ -547,6 +548,7 @@ function merge() {
 
 // FIXME: Internal flow.js resolution problem workaround
 var _merge = exports._merge = merge;
+merge._merge = merge;
 
 // Browserify compat
 if (typeof module !== "undefined")

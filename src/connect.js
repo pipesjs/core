@@ -67,6 +67,7 @@ export default function connect(
 
 // FIXME: Internal flow.js resolution problem workaround
 export const _connect = connect;
+connect._connect = connect;
 
 // Browserify compat
 if ( typeof module !== "undefined" )
