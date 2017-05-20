@@ -108,6 +108,31 @@ The `core` library only consists of the following functions:
 -   [zip](#zip)
 -   [split](#split)
 
+**Set up code for examples**
+
+```javascript
+  // Setup
+  let createReadable = data => new ReadableStream({
+      start (controller) {
+      this.data = data || [1,2,3];
+
+      // Kickstart stream
+      controller.enqueue( this.data.pop() );
+      },
+      pull (controller) {
+      if ( !this.data.length )
+          return controller.close()
+
+      controller.enqueue( this.data.pop() );
+      }
+  }),
+  createWritable = () => new WritableStream({
+      write (chunk) {
+      console.log( chunk );
+      }
+  });
+```
+
 
 ## accumulate
 
@@ -184,28 +209,7 @@ This function takes any normal/generator func and returns a transform stream.
 **Examples**
 
 ```javascript
-// Setup
-  let createReadable = data => new ReadableStream({
-      start (controller) {
-      this.data = data || [1,2,3];
-
-      // Kickstart stream
-      controller.enqueue( this.data.pop() );
-      },
-      pull (controller) {
-      if ( !this.data.length )
-          return controller.close()
-
-      controller.enqueue( this.data.pop() );
-      }
-  }),
-  createWritable = () => new WritableStream({
-      write (chunk) {
-      console.log( chunk );
-      }
-  });
-
-  // Pure funtion example
+// Pure funtion example
   let negator = pipe( n => -n ),
     rIn = createReadable(),
     rOut;
@@ -221,8 +225,10 @@ This function takes any normal/generator func and returns a transform stream.
   rOut;
 
   rOut = rIn.pipeThrough( new doubler );  // 1, 1, 2, 2, 3, 3
+```
 
-  // Infinite generator example
+```javascript
+// Infinite generator example
 
   let inf = pipe( function* (v) {
       // Close on shutdown signal

@@ -12,28 +12,6 @@ import pipeGen from "./pipeGen";
  * @returns {TransformStream}
  *
  * @example
- *
- *   // Setup
- *   let createReadable = data => new ReadableStream({
- *       start (controller) {
- *       this.data = data || [1,2,3];
- *
- *       // Kickstart stream
- *       controller.enqueue( this.data.pop() );
- *       },
- *       pull (controller) {
- *       if ( !this.data.length )
- *           return controller.close()
- *
- *       controller.enqueue( this.data.pop() );
- *       }
- *   }),
- *   createWritable = () => new WritableStream({
- *       write (chunk) {
- *       console.log( chunk );
- *       }
- *   });
- *
  *   // Pure funtion example
  *   let negator = pipe( n => -n ),
  *     rIn = createReadable(),
@@ -51,6 +29,7 @@ import pipeGen from "./pipeGen";
  *
  *   rOut = rIn.pipeThrough( new doubler );  // 1, 1, 2, 2, 3, 3
  *
+ * @example
  *   // Infinite generator example
  *
  *   let inf = pipe( function* (v) {
