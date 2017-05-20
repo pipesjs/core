@@ -8,6 +8,14 @@ import { zipWith } from "./utils";
 /**
  * This function takes one or more streams and returns a readable combining
  * the streams, returning chunks as they arrive in combined streams.
+ *
+ * @example
+ * let r1 = createReadable([1,2,3]),
+ *   r2 = createReadable([4,5,6]),
+ *   writable = createWritable(),
+ *   flattened = flatten(r1,r2);
+ *
+ * flattened.pipeTo( writable );   // 1,4,2,5,3,6   (order depends on order received so may vary)
  */
 export default function flatten(...streams: Array<ReadableStream>): ReadableStream {
   let
