@@ -251,6 +251,34 @@ This function takes any async func and returns a transform stream.
 -   `asyncFunction` **[function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function)** an async function that returns a Promise
 -   `opts` **[object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** containing config options
 
+**Examples**
+
+```javascript
+// Basic async example
+let serverTalker = pipe.async( async function (msg) {
+    let response = await sendToServer( msg );
+    return response;
+  }),
+  rIn = createReadable(),
+  rOut;
+
+rOut = rIn.pipeThrough( new serverTalker );  // {response}, {response}, {response}
+```
+
+```javascript
+// Basic promise example
+let serverTalker = pipe.async( function (msg) {
+    let response = new Promise( resolve => {
+      sendToServer( msg, resolve );
+    });
+    return response;
+  }),
+  rIn = createReadable(),
+  rOut;
+
+rOut = rIn.pipeThrough( new serverTalker );  // {response}, {response}, {response}
+```
+
 Returns **any** TransformStream
 
 ## split

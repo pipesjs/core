@@ -73,7 +73,32 @@ function pipe(fn, opts) {
  * @name pipe.async
  * @param {function} asyncFunction an async function that returns a Promise
  * @param {object} opts containing config options
+ *
  * @returns TransformStream
+ *
+ * @example
+ * // Basic async example
+ * let serverTalker = pipe.async( async function (msg) {
+ *     let response = await sendToServer( msg );
+ *     return response;
+ *   }),
+ *   rIn = createReadable(),
+ *   rOut;
+ *
+ * rOut = rIn.pipeThrough( new serverTalker );  // {response}, {response}, {response}
+ *
+ * @example
+ * // Basic promise example
+ * let serverTalker = pipe.async( function (msg) {
+ *     let response = new Promise( resolve => {
+ *       sendToServer( msg, resolve );
+ *     });
+ *     return response;
+ *   }),
+ *   rIn = createReadable(),
+ *   rOut;
+ *
+ * rOut = rIn.pipeThrough( new serverTalker );  // {response}, {response}, {response}
  */
 pipe.async = _pipeAsync2.default;
 
