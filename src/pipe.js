@@ -1,4 +1,4 @@
-import { isFunction, isGeneratorFn } from "./utils";
+import { EOS, isFunction, isGeneratorFn } from "./utils";
 
 import pipeAsync from "./pipeAsync";
 import pipeFn from "./pipeFn";
@@ -95,6 +95,15 @@ export default function pipe ( fn, opts ) {
  * rOut = rIn.pipeThrough( new serverTalker );  // {response}, {response}, {response}
  */
 pipe.async = pipeAsync;
+
+/**
+ * "End of Stream" This is the equivalent of `EOF` char in UNIX systems, if a `pipe` `function` returns
+ * this at any point, the streams are gracefully closed.
+ *
+ * @name pipe.eos
+ * @example
+ */
+pipe.eos = EOS;
 
 // Browserify compat
 if ( typeof module !== "undefined" )

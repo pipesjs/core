@@ -7,6 +7,8 @@ exports.default = pipeAsync;
 
 var _streams = require("./streams");
 
+var _utils = require("./utils");
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -37,6 +39,13 @@ function pipeAsync(fn) {
       // Run async fn
       var future = fn(chunk),
           condEnqueue = function condEnqueue(v) {
+
+        // Check for EOS
+        if (v === _utils.EOS) {
+          controller.close();
+          return;
+        }
+
         if (v !== void 0) controller.enqueue(v);
       },
 

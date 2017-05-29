@@ -19,6 +19,7 @@ import type {
 import type { anyFn } from "./utils";
 
 import { TransformStream } from "./streams";
+import { EOS } from "./utils";
 
 export default function pipeFn ( fn: anyFn, {
     init, readableStrategy, writableStrategy
@@ -35,6 +36,12 @@ export default function pipeFn ( fn: anyFn, {
     // Run function and enqueue result
     transform ( chunk: mixed, controller: ReadableStreamController ) {
       let v: mixed = fn( chunk );
+
+      // Check for EOS
+      if ( v === EOS ) {
+        controller.close();
+        return;
+      }
 
       if ( v !== void 0 )
         controller.enqueue( v );

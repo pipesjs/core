@@ -13,6 +13,7 @@
 -   [merge](#merge)
 -   [pipe](#pipe)
 -   [pipe.async](#pipeasync)
+-   [pipe.eos](#pipeeos)
 -   [split](#split)
 
 ## Introducing pipes/core
@@ -340,6 +341,11 @@ rOut = rIn.pipeThrough( new serverTalker );  // {response}, {response}, {respons
 ```
 
 Returns **any** TransformStream
+
+## pipe.eos
+
+"End of Stream" This is the equivalent of `EOF` char in UNIX systems, if a `pipe` `function` returns
+this at any point, the streams are gracefully closed.
 
 ## split
 

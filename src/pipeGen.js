@@ -22,7 +22,7 @@ import type {
 } from "./streams";
 
 import { ReadableStream, WritableStream } from "./streams";
-import { uuid, events, isFunction } from "./utils";
+import { EOS, uuid, events, isFunction } from "./utils";
 
 const
   readyEvt: string = uuid(),
@@ -54,8 +54,15 @@ function pump (
     step = controller[closedProp] ? gen.return(true) : gen.next(false),
     { done, value } = step;
 
-  // Enqueue
-  controller.enqueue( value );
+  // Check for EOS and enqueue
+  if ( value === EOS ) {
+    controller.close();
+    done = true;
+
+  } else {
+    // Enqueue
+    controller.enqueue( value );
+  }
 
   // Generator exhausted? resolve promise
   if ( done ) {

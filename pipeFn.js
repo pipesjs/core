@@ -7,6 +7,8 @@ exports.default = pipeFn;
 
 var _streams = require("./streams");
 
+var _utils = require("./utils");
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -32,6 +34,12 @@ function pipeFn(fn) {
     // Run function and enqueue result
     transform: function transform(chunk, controller) {
       var v = fn(chunk);
+
+      // Check for EOS
+      if (v === _utils.EOS) {
+        controller.close();
+        return;
+      }
 
       if (v !== void 0) controller.enqueue(v);
     },

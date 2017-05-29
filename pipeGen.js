@@ -48,8 +48,14 @@ function pump(gen, controller, resolve) {
       done = step.done,
       value = step.value;
 
-  // Enqueue
-  controller.enqueue(value);
+  // Check for EOS and enqueue
+  if (value === _utils.EOS) {
+    controller.close();
+    done = true;
+  } else {
+    // Enqueue
+    controller.enqueue(value);
+  }
 
   // Generator exhausted? resolve promise
   if (done) {

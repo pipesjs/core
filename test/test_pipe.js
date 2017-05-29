@@ -29,6 +29,38 @@ test("check instantiation", () => {
     transform3.writable );
 });
 
+test("check eos", done => {
+  let input = [1,2,3],
+    output = [1,2,3],
+    res = [],
+    writable;
+
+  let { readable } = new pipe(
+      function* iterator() {
+          yield* input;
+          return pipe.eos;
+      }, {
+      init: null
+    });
+
+  // Create test streams
+  writable = createTestWritable( c => { console.log( c ); res.push( c ); });
+
+  // End case
+  broker.on(writable.signals.close, () => {
+    // Make sure result array
+    console.log( res );
+    assert.deepEqual( res, output );
+
+    done();
+  });
+
+  // Connect the streams
+  assert.doesNotThrow( () => {
+    connect( readable, writable );
+  });
+});
+
 test("check simple function", done => {
   let readable, writable, transform;
 

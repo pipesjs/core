@@ -20,6 +20,7 @@ import type {
 import type { asyncFn } from "./utils";
 
 import { TransformStream } from "./streams";
+import { EOS } from "./utils";
 
 export default function pipeAsync ( fn: asyncFn, {
     init, readableStrategy, writableStrategy
@@ -41,6 +42,13 @@ export default function pipeAsync ( fn: asyncFn, {
       let
         future = fn( chunk ),
         condEnqueue = v => {
+
+          // Check for EOS
+          if ( v === EOS ) {
+              controller.close();
+              return;
+          }
+
           if ( v !== void 0 )
             controller.enqueue( v );
         },

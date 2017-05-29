@@ -659,6 +659,15 @@ function pipe(fn, opts) {
  */
 pipe.async = _pipeAsync2.default;
 
+/**
+ * "End of Stream" This is the equivalent of `EOF` char in UNIX systems, if a `pipe` `function` returns
+ * this at any point, the streams are gracefully closed.
+ *
+ * @name pipe.eos
+ * @example
+ */
+pipe.eos = _utils.EOS;
+
 // Browserify compat
 if (typeof module !== "undefined") module.exports = pipe;
 },{"./pipeAsync":8,"./pipeFn":9,"./pipeGen":10,"./utils":13}],8:[function(require,module,exports){
@@ -670,6 +679,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = pipeAsync;
 
 var _streams = require("./streams");
+
+var _utils = require("./utils");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -701,6 +712,13 @@ function pipeAsync(fn) {
       // Run async fn
       var future = fn(chunk),
           condEnqueue = function condEnqueue(v) {
+
+        // Check for EOS
+        if (v === _utils.EOS) {
+          controller.close();
+          return;
+        }
+
         if (v !== void 0) controller.enqueue(v);
       },
 
@@ -775,7 +793,7 @@ function pipeAsync(fn) {
 
   if (this instanceof pipeAsync) return new TransformBlueprint();else return TransformBlueprint;
 }
-},{"./streams":12}],9:[function(require,module,exports){
+},{"./streams":12,"./utils":13}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -784,6 +802,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = pipeFn;
 
 var _streams = require("./streams");
+
+var _utils = require("./utils");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -810,6 +830,12 @@ function pipeFn(fn) {
     // Run function and enqueue result
     transform: function transform(chunk, controller) {
       var v = fn(chunk);
+
+      // Check for EOS
+      if (v === _utils.EOS) {
+        controller.close();
+        return;
+      }
 
       if (v !== void 0) controller.enqueue(v);
     },
@@ -851,7 +877,7 @@ function pipeFn(fn) {
 
   return TransformBlueprint;
 }
-},{"./streams":12}],10:[function(require,module,exports){
+},{"./streams":12,"./utils":13}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -902,8 +928,14 @@ function pump(gen, controller, resolve) {
       done = step.done,
       value = step.value;
 
-  // Enqueue
-  controller.enqueue(value);
+  // Check for EOS and enqueue
+  if (value === _utils.EOS) {
+    controller.close();
+    done = true;
+  } else {
+    // Enqueue
+    controller.enqueue(value);
+  }
 
   // Generator exhausted? resolve promise
   if (done) {
@@ -1142,7 +1174,7 @@ exports.default = interfaces;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.isGeneratorFn = exports.isGenerator = exports.isFunction = exports.isWritable = exports.isReadable = exports.isTransform = exports.events = exports.Events = undefined;
+exports.isGeneratorFn = exports.isGenerator = exports.isFunction = exports.isWritable = exports.isReadable = exports.isTransform = exports.events = exports.Events = exports.EOS = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -1153,7 +1185,11 @@ var _streams = require("./streams");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+// Consts
+var EOS = exports.EOS = Symbol.for("pipe.eos");
+
 // Events
+
 var Events = exports.Events = function () {
   function Events() {
     _classCallCheck(this, Events);

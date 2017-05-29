@@ -3,6 +3,9 @@
 import type { Stream, ReadableWritable } from "./streams";
 import { ReadableStream, WritableStream } from "./streams";
 
+// Consts
+export const EOS: Symbol = Symbol.for("pipe.eos");
+
 // Events
 export type anyFn = (...vals: Array<mixed>) => mixed;
 export type asyncFn = (...vals: Array<mixed>) => Promise<mixed>;

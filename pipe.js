@@ -102,5 +102,14 @@ function pipe(fn, opts) {
  */
 pipe.async = _pipeAsync2.default;
 
+/**
+ * "End of Stream" This is the equivalent of `EOF` char in UNIX systems, if a `pipe` `function` returns
+ * this at any point, the streams are gracefully closed.
+ *
+ * @name pipe.eos
+ * @example
+ */
+pipe.eos = _utils.EOS;
+
 // Browserify compat
 if (typeof module !== "undefined") module.exports = pipe;
