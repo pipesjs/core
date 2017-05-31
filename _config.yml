@@ -1,6 +1,6 @@
-title: PipesJs/Core
+title: @pipes/core
 description: Basic utilities for web streams
-google_analytics: 
+google_analytics:
 show_downloads: true
 theme: jekyll-theme-minimal
 
