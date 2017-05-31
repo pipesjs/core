@@ -3,6 +3,5 @@ description: Basic utilities for web streams
 google_analytics: UA-100215781-1
 show_downloads: true
 theme: jekyll-theme-minimal
-
 gems:
   - jekyll-mentions
