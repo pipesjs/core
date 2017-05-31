@@ -1,5 +1,12 @@
 CONTRIBUTING.md
 pre-commit-hook
+docs
 test
 .npmignore
 .gitignore
+.flowconfig
+.babelrc
+documentation.yml
+*.tgz
+
+!*.js

@@ -1,7 +1,10 @@
-# build files
-*.js
+# Keep these
 !test/*.js
 !src/*.js
+
+# build files
+*.js
+*.tgz
 
 # misc
 todos
