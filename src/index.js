@@ -1,3 +1,9 @@
+try {
+  require("babel-polyfill");
+} catch (e) {
+  console.error("babel-polyfill not loaded. " + e.toString() );
+}
+
 import accumulate from "./accumulate";
 import connect from "./connect";
 import chain from "./chain";
