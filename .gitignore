@@ -1,10 +1,13 @@
-# Keep these
-!test/*.js
-!src/*.js
-
 # build files
 *.js
 *.tgz
+
+# Keep these
+!test/*.js
+!src/*.js
+!dist/*.js
+!rollup.config.js
+!rollup.js
 
 # misc
 todos
