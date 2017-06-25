@@ -3,6 +3,8 @@
   "version": "0.8.3",
   "description": "Basic utilities for web streams",
   "main": "index.js",
+  "browser": "dist/pipes.core.js",
+  "module": "src/index.js",
   "scripts": {
     "build": "babel src -d .",
     "bundle": "browserify --external web-streams-polyfill index.js > dist/pipes.core.js",
@@ -13,7 +15,7 @@
     "dist": "npm run bundle && npm run minify",
     "build-all": "npm run docs && npm run build && npm run dist && npm run rollup",
     "prepare": "npm run build-all",
-    "prepublishOnly": "npm run build-all",
+    "prepublishOnly": "npm test && npm run build-all",
     "test": "npm run flow && mocha --ui qunit --compilers js:babel-register"
   },
   "repository": {

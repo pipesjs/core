@@ -12,14 +12,15 @@ import { minify } from "uglify-es";
 
 const prod = process.env.NODE_ENV === "production",
       entry = "src/index.js",
-      moduleName = "PipesCore",
-      dest = `dist/pipes.core.es6${ prod ? '.min' : '' }.js`;
+      moduleName = "Pipes.core";
 
 export const uglifier = uglify({}, minify);
 export let cache;
 
 export function genConfig( prod=false ) {
-  return {
+  let dest = `dist/pipes.core.es6${ prod ? '.min' : '' }.js`;
+
+  return Object.assign({}, {
     entry,
     moduleName,
     dest,
@@ -36,7 +37,7 @@ export function genConfig( prod=false ) {
       prod && uglifier,
       filesize()
     ]
-  };
+  } );
 }
 
 export default genConfig( prod );
