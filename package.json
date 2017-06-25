@@ -1,6 +1,6 @@
 {
   "name": "@pipes/core",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Basic utilities for web streams",
   "main": "index.js",
   "browser": "dist/pipes.core.js",
