@@ -1,6 +1,3 @@
-(function (exports) {
-'use strict';
-
 let interfaces;
 let global = global || {};
 if ( typeof window !== 'undefined' )
@@ -519,13 +516,4 @@ if ( typeof window !== "undefined")
     Pipes: fns
   });
 
-exports.accumulate = accumulate;
-exports.connect = connect;
-exports.chain = chain;
-exports.flatten = flatten;
-exports.merge = merge;
-exports.pipe = pipe;
-exports.split = split;
-exports['default'] = fns;
-
-}((this.PipesCore = this.PipesCore || {})));
+export { accumulate, connect, chain, flatten, merge, pipe, split };export default fns;

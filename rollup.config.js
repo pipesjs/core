@@ -15,20 +15,28 @@ const prod = process.env.NODE_ENV === "production",
       moduleName = "PipesCore",
       dest = `dist/pipes.core.es6${ prod ? '.min' : '' }.js`;
 
-export default {
-  entry,
-  moduleName,
-  dest,
-  format: "iife",
-  exports: "named",
-  plugins: [
-    flow(),
-    commonjs({ include: 'node_modules/**' }),
-    ignore(["babel-polyfill", "web-streams-polyfill"]),
-    resolve(),
-    _async(),
-    cleanup(),
-    prod && uglify({}, minify),
-    filesize()
-  ]
-};
+export const uglifier = uglify({}, minify);
+export let cache;
+
+export function genConfig( prod=false ) {
+  return {
+    entry,
+    moduleName,
+    dest,
+    cache,
+    format: "iife",
+    exports: "named",
+    plugins: [
+      flow(),
+      commonjs({ include: 'node_modules/**' }),
+      ignore(["babel-polyfill", "web-streams-polyfill"]),
+      resolve(),
+      _async(),
+      cleanup(),
+      prod && uglifier,
+      filesize()
+    ]
+  };
+}
+
+export default genConfig( prod );

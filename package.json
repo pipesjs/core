@@ -6,11 +6,12 @@
   "scripts": {
     "build": "babel src -d .",
     "bundle": "browserify --external web-streams-polyfill index.js > dist/pipes.core.js",
+    "rollup": "babel-node rollup.js",
     "flow": "flow",
     "docs": "documentation build --config documentation.yml src/index.js -f md > README.md",
     "minify": "uglifyjs dist/pipes.core.js -o dist/pipes.core.min.js -c",
     "dist": "npm run bundle && npm run minify",
-    "build-all": "npm run docs && npm run build && npm run dist",
+    "build-all": "npm run docs && npm run build && npm run dist && npm run rollup",
     "prepare": "npm run build-all",
     "prepublishOnly": "npm run build-all",
     "test": "npm run flow && mocha --ui qunit --compilers js:babel-register"
@@ -43,6 +44,7 @@
     "babel-register": "^6.6.0",
     "babel-runtime": "^6.6.1",
     "browserify": "^13.0.0",
+    "co": "^4.6.0",
     "documentation": "^4.0.0-rc.1",
     "flow-bin": "^0.46.0",
     "mocha": "^2.4.5",
