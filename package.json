@@ -15,6 +15,7 @@
     "dist": "npm run bundle && npm run minify",
     "build-all": "npm run docs && npm run build && npm run dist && npm run rollup",
     "prepare": "npm run build-all",
+    "precommit": "npm test",
     "prepublishOnly": "npm test && npm run build-all",
     "test": "npm run flow && mocha --ui qunit --compilers js:babel-register"
   },
@@ -49,6 +50,7 @@
     "co": "^4.6.0",
     "documentation": "^4.0.0-rc.1",
     "flow-bin": "^0.46.0",
+    "husky": "^0.14.1",
     "mocha": "^2.4.5",
     "rollup": "^0.43.0",
     "rollup-plugin-async": "^1.2.0",
