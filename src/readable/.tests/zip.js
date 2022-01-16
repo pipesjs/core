@@ -1,4 +1,5 @@
-import { consume, makeReadable } from "../../../../../test/utils";
+
+import { consume, makeReadable } from "../../test_utils";
 import { zip } from "../";
 
 test("zip", async () => {

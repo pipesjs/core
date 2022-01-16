@@ -10,7 +10,7 @@ import {
   TransformStream,
 } from "web-streams-polyfill";
 
-import { Pipe } from "../pipes/core/pipe";
+import { Pipe } from "../../core/pipe";
 
 export const and = (f, g) => (a) => f(a) && g(a);
 export const or = (f, g) => (a) => f(a) || g(a);

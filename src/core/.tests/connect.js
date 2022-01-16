@@ -1,4 +1,5 @@
-import { makeReadable } from "../../../../../test/utils";
+
+import { makeReadable } from "../../test_utils";
 import { pipe, connect } from "../";
 
 import {

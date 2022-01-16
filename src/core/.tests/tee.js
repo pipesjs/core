@@ -2,7 +2,7 @@
 
 import { TransformStream } from "web-streams-polyfill";
 
-import { makeReadable, makeWritable } from "../../../../../test/utils";
+import { makeReadable, makeWritable } from "../../test_utils";
 import { pipe, tee } from "../";
 
 test("tee", async () => {

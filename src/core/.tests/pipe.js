@@ -1,7 +1,7 @@
 import { Arrow } from "crocks";
 import { TransformStream, ReadableStream } from "web-streams-polyfill";
 
-import { consume, makeReadable } from "../../../../../test/utils";
+import { consume, makeReadable } from "../../test_utils";
 import { pipe, Pipe, EOS } from "../";
 
 test("PipeIsArrow", async () => {

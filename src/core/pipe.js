@@ -17,7 +17,7 @@ import Pair from "crocks/Pair";
 import { isUndefined } from "lodash";
 import { TransformStream } from "web-streams-polyfill";
 
-import { Arrow } from "../internal/structs/base/crocks";
+import { Arrow } from "../internal/structs/crocks";
 import makePromise from "../internal/utils/makePromise";
 import PatchCrock from "../internal/utils/PatchCrock";
 

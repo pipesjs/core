@@ -3,7 +3,7 @@ import { _, it } from "param.macro";
 import Pred from "crocks/Pred";
 import { TransformStream } from "web-streams-polyfill";
 
-import { makeReadable, makeWritable } from "../../../../../test/utils";
+import { makeReadable, makeWritable } from "../../test_utils";
 import { filter } from "../";
 
 test("filter", async () => {

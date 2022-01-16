@@ -3,13 +3,11 @@
   "version": "2.0.0",
   "description": "Pipes are simple, functional and composable wrappers for the Web Streams API",
   "main": "dist/index.js",
+  "type": "commonjs",
   "scripts": {
-    "test": "ava",
+    "test": "npm run build && test",
     "build": "babel src -d dist",
     "prettify": "prettier --write ."
-  },
-  "ava": {
-    "babel": true
   },
   "repository": {
     "type": "git",
@@ -30,24 +28,34 @@
   },
   "homepage": "https://github.com/pipesjs/core#readme",
   "devDependencies": {
-    "@ava/babel": "^2.0.0",
     "@babel/cli": "^7.16.8",
     "@babel/core": "^7.16.7",
     "@babel/eslint-parser": "^7.16.5",
     "@babel/plugin-proposal-pipeline-operator": "^7.16.7",
+    "@babel/plugin-transform-runtime": "^7.16.8",
     "@babel/preset-env": "^7.16.8",
     "@babel/preset-flow": "^7.16.7",
     "@rollup/plugin-babel": "^5.3.0",
+    "babel-plugin-import-glob": "^2.0.0",
+    "babel-plugin-lodash": "^3.3.4",
     "babel-plugin-macros": "^3.1.0",
     "eslint": "^8.6.0",
     "export-all.macro": "^0.0.0",
+    "inspect.macro": "^0.0.0",
+    "jest": "^27.4.7",
+    "jest-prop-type-error": "^1.1.0",
+    "node-notifier": "^10.0.0",
     "param.macro": "^3.2.1",
     "prettier": "^2.5.1",
+    "from2": "^2.3.0",
+    "through2": "^4.0.2",
     "rollup": "^2.64.0"
   },
   "dependencies": {
+    "@babel/runtime": "^7.16.7",
     "@ygor/list": "^5.4.1",
     "crocks": "^0.12.4",
+    "global": "^4.4.0",
     "lodash": "^4.17.21",
     "polytype": "^0.14.0",
     "web-streams-polyfill": "^3.2.0"

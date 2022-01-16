@@ -1,6 +1,6 @@
 import { TransformStream } from "web-streams-polyfill";
 
-import { consume, makeReadable } from "../../../../../test/utils";
+import { consume, makeReadable } from "../../test_utils";
 import { pipe, chain } from "../";
 
 test("PipeChain", async () => {

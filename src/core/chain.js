@@ -6,7 +6,7 @@ import { it } from "param.macro";
 import { TransformStream } from "web-streams-polyfill";
 
 import fromReadableWritable from "../convert/fromReadableWritable";
-import reverse from "../internal/reverse";
+import reverse from "../internal/utils/reverse";
 import passthrough from "../utils/passthrough";
 import { Pipe } from "./pipe";
 

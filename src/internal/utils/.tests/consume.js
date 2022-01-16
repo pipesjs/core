@@ -2,6 +2,7 @@
 
 import { _, it } from "param.macro";
 
+
 import { consume } from "../";
 
 function* mkGen() {

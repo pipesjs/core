@@ -2,8 +2,6 @@
 
 // ./src/internal/utils/makePromise.js
 
-import Promise from "pacta";
-
 export default function makePromise(): Array<Promise | Function> {
   let reject;
   let resolve;

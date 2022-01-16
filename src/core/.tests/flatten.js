@@ -1,4 +1,5 @@
-import { consume, makeReadable } from "../../../../../test/utils";
+
+import { consume, makeReadable } from "../../test_utils";
 import { flatten, pipe } from "../";
 
 test("Flatten", async () => {

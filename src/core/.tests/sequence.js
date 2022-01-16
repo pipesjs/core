@@ -1,5 +1,6 @@
-import { consume, makeReadable } from "../../../../../test/utils";
-import { makePromise } from "../../../utils";
+
+import { consume, makeReadable } from "../../test_utils";
+import { makePromise } from "../../internal/utils";
 import { sequence, pipe } from "../";
 
 test("Sequence", async () => {

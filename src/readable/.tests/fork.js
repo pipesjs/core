@@ -1,6 +1,7 @@
 import { _, it } from "param.macro";
 
-import { makeReadable, makeWritable } from "../../../../../test/utils";
+
+import { makeReadable, makeWritable } from "../../test_utils";
 import { fork } from "../";
 
 test("fork", async () => {

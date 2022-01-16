@@ -1,7 +1,10 @@
 {
   "presets": ["@babel/preset-env", "@babel/preset-flow"],
   "plugins": [
+    "import-glob",
+    "@babel/transform-runtime",
     "macros",
+    "lodash",
     ["@babel/plugin-proposal-pipeline-operator", { "proposal": "minimal" }]
   ]
 }
