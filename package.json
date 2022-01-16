@@ -1,0 +1,55 @@
+{
+  "name": "@pipes/core",
+  "version": "2.0.0",
+  "description": "Pipes are simple, functional and composable wrappers for the Web Streams API",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "ava",
+    "build": "babel src -d dist",
+    "prettify": "prettier --write ."
+  },
+  "ava": {
+    "babel": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pipesjs/core.git"
+  },
+  "keywords": [
+    "pipes",
+    "web-stream",
+    "pipesjs",
+    "readable-stream",
+    "web-streams",
+    "stream-utils"
+  ],
+  "author": "Diwank Tomer <singh@diwank.name>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pipesjs/core/issues"
+  },
+  "homepage": "https://github.com/pipesjs/core#readme",
+  "devDependencies": {
+    "@ava/babel": "^2.0.0",
+    "@babel/cli": "^7.16.8",
+    "@babel/core": "^7.16.7",
+    "@babel/eslint-parser": "^7.16.5",
+    "@babel/plugin-proposal-pipeline-operator": "^7.16.7",
+    "@babel/preset-env": "^7.16.8",
+    "@babel/preset-flow": "^7.16.7",
+    "@rollup/plugin-babel": "^5.3.0",
+    "babel-plugin-macros": "^3.1.0",
+    "eslint": "^8.6.0",
+    "export-all.macro": "^0.0.0",
+    "param.macro": "^3.2.1",
+    "prettier": "^2.5.1",
+    "rollup": "^2.64.0"
+  },
+  "dependencies": {
+    "@ygor/list": "^5.4.1",
+    "crocks": "^0.12.4",
+    "lodash": "^4.17.21",
+    "polytype": "^0.14.0",
+    "web-streams-polyfill": "^3.2.0"
+  }
+}
